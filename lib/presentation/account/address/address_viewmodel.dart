@@ -1,0 +1,328 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:sewiee/app/utils/toast.dart';
+import 'package:sewiee/data/model/address_model.dart';
+import 'package:sewiee/data/model/user_model.dart';
+import 'package:sewiee/domain/repositories/address_repository.dart';
+import 'package:sewiee/domain/repositories/user_repository.dart';
+import 'package:uuid/uuid.dart';
+
+class AddressViewmodel extends ChangeNotifier {
+  /// =========================
+  /// GENERAL VARIABLE
+  /// =========================
+  bool isLoading = false;
+
+  /// =========================
+  /// USER VARIABLE
+  /// =========================
+  UserModel? userModel;
+  UserRepository userRepository = UserRepository();
+
+  /// =========================
+  /// PLACES VARIABLE
+  /// =========================
+  String? placesAPI;
+
+  /// =========================
+  /// ADDRESS VARIABLE
+  /// =========================
+  AddressModel? addressModel;
+  List<AddressModel?> addresses = [];
+  AddressRepository addressRepository = AddressRepository();
+  int? selectedAddress = 0;
+
+  /// =========================
+  /// MAPS VARIABLE
+  /// =========================
+
+  LatLng? selectedLatLng;
+
+  final Set<Marker> initialMarkers = {
+    Marker(
+      markerId: MarkerId('initialMarker'),
+      position: LatLng(-6.1753083, 106.8271106),
+    ),
+  };
+
+  final CameraPosition initialCameraPosition = CameraPosition(
+    target: LatLng(-6.1753083, 106.8271106),
+    zoom: 15,
+  );
+
+  /// =========================
+  /// SETTERSSS
+  /// =========================
+
+  void setSelectedAddress(int? index) {
+    selectedAddress = index;
+    notifyListeners();
+  }
+
+  void setCurrentUser(UserModel? user) {
+    userModel = user;
+    notifyListeners();
+  }
+
+  /// =========================
+  /// USER FUNCTIONS
+  /// =========================
+
+  Future<void> getCurrentUser() async {
+    isLoading = true;
+    notifyListeners();
+    try {
+      userModel = await userRepository.getCurrentUser();
+    } catch (e) {
+      rethrow;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// =========================
+  /// MAPS FUNCTIONS
+  /// =========================
+
+  void getMapsApi() {
+    placesAPI = dotenv.get("GOOGLE_MAPS_API_KEY");
+    notifyListeners();
+  }
+
+  Future<LatLng?> getCurrentLocation() async {
+    isLoading = true;
+    notifyListeners();
+
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      return null;
+    }
+
+    permission = await Geolocator.checkPermission();
+    try {
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          return null;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        return null;
+      }
+      Position position = await Geolocator.getCurrentPosition();
+      return LatLng(position.latitude, position.longitude);
+    } catch (e) {
+      rethrow;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateSelectedLocation(LatLng latLng) async {
+    selectedLatLng = latLng;
+    await getAddressFromLatLng(latLng.latitude, latLng.longitude);
+    notifyListeners();
+
+  }
+
+  /// =========================
+  /// ADDRESS FUNCTIONS
+  /// =========================
+
+
+
+  Future<void> getUserAddresses() async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      addresses = await addressRepository.getUserAddresses(userModel!.uid);
+    } catch (e) {
+      rethrow;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void setAddress(AddressModel address) {
+    addressModel = address;
+
+    selectedLatLng = LatLng(address.latitude!, address.longitude!);
+
+    notifyListeners();
+  }
+
+  Future<void> getAddressFromLatLng(double latitude, double longitude) async {
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      final placemarks = await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isEmpty) return;
+      final place = placemarks.first;
+      final String? street = place.street?.isNotEmpty == true
+          ? place.street
+          : place.thoroughfare?.isNotEmpty == true
+          ? place.thoroughfare
+          : place.name;
+
+      final String? province = place.administrativeArea;
+      final String? regency = place.subAdministrativeArea;
+      final String? district = place.locality;
+      final String? village = place.subLocality;
+      final String? placePostCode = place.postalCode;
+
+      final List<String> addressParts = [
+        street ?? '',
+        village ?? '',
+        district ?? '',
+        regency ?? '',
+        province ?? '',
+        placePostCode ?? '',
+      ];
+
+      final String fullAddress = addressParts
+          .where((e) => e.isNotEmpty)
+          .join(', ');
+
+
+      if(addressModel?.id != null){
+        addressModel = addressModel!.copyWith(
+          latitude: latitude,
+          longitude: longitude,
+          street: street ?? addressModel?.street,
+          province: province ?? addressModel?.province,
+          regency: regency ?? addressModel?.regency,
+          district: district ?? addressModel?.district,
+          village: village ?? addressModel?.village,
+          postCode: placePostCode ?? addressModel?.postCode,
+          fullAddress: fullAddress,
+        );
+      } else {
+        addressModel = AddressModel(
+          latitude: latitude,
+          longitude: longitude,
+          street: street,
+          province: province,
+          regency: regency,
+          district: district,
+          village: village,
+          postCode: placePostCode,
+          fullAddress: fullAddress,
+        );
+      }
+      notifyListeners();
+
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> createAddressToFirestore({
+    required String contactName,
+    required String contactPhoneNumber,
+    String? courierMessage,
+    required String label,
+  }) async {
+    if (addressModel == null || userModel == null) {
+      return false;
+    }
+
+    final String addressId = Uuid().v4();
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      addressModel = addressModel!.copyWith(
+        id: addressId,
+        contactName: contactName,
+        contactPhoneNumber: contactPhoneNumber,
+        courierMessage: courierMessage,
+        label: label,
+      );
+
+      await addressRepository.createAddress(userModel!.uid, addressModel!);
+      clearAddress();
+
+      return true;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> updateExistingAddress({
+    required String contactName,
+    required String contactPhoneNumber,
+    String? courierMessage,
+    required String label,
+  }) async {
+    if (addressModel == null || userModel == null) {
+      return false;
+    }
+
+    isLoading = true;
+    notifyListeners();
+
+    try {
+      addressModel = addressModel!.copyWith(
+        contactName: contactName,
+        contactPhoneNumber: contactPhoneNumber,
+        courierMessage: courierMessage ?? '',
+        label: label,
+      );
+      await addressRepository.updateUserAddress(userModel!.uid, addressModel!);
+
+      return true;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteUserAddress(BuildContext context, String addressId) async{
+    isLoading = true;
+    notifyListeners();
+    try{
+      await addressRepository.deleteUserAddress(userModel!.uid, addressId);
+      Navigator.pop(context);
+      Toast().showToast(context, 'Berhasil Menghapus Alamat');
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// =========================
+  /// RESET
+  /// =========================
+
+  void clearAddress() {
+    addressModel = null;
+    selectedLatLng = null;
+
+    notifyListeners();
+  }
+}
