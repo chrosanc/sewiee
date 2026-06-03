@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +13,6 @@ import 'package:sewiee/presentation/widget/button_widget.dart';
 import 'package:sewiee/presentation/widget/checkbox_list_widget.dart';
 import 'package:sewiee/presentation/widget/chip_widget.dart';
 import 'package:sewiee/presentation/widget/dropdown_widget.dart';
-import 'package:sewiee/presentation/widget/loading_widget.dart';
 import 'package:sewiee/presentation/widget/multiline_text_widget.dart';
 import 'package:sewiee/presentation/widget/text_input_widget.dart';
 
@@ -57,10 +55,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
   Widget build(BuildContext context) {
     final vm = Provider.of<AddProductViewmodel>(context);
 
-    if (vm.isLoading) {
-      return LoadingWidget();
-    }
-
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
@@ -77,10 +71,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               children: [
                 SizedBox(height: 10),
                 SizedBox(
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width,
+                  width: MediaQuery.of(context).size.width,
                   child: Card(
                     color: Colors.white,
                     child: Padding(
@@ -99,7 +90,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   SizedBox(width: 10),
                                   Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         vm.userModel?.storeName ?? 'Nama Toko',
@@ -351,12 +342,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               context: context,
                               title: 'Pilih Metode Pengiriman',
                               description:
-                              'Pilih metode yang dapat digunakan oleh penyewa',
+                                  'Pilih metode yang dapat digunakan oleh penyewa',
                               child: StatefulBuilder(
                                 builder: (context, setModalState) {
                                   return Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       CheckboxListWidget(
                                         title: 'Ambil Sendiri',
@@ -367,7 +358,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           setModalState(() {});
                                         },
                                         controlAffinity:
-                                        ListTileControlAffinity.leading,
+                                            ListTileControlAffinity.leading,
                                       ),
                                       Divider(color: Colors.grey.shade300),
                                       CheckboxListWidget(
@@ -382,7 +373,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           setModalState(() {});
                                         },
                                         controlAffinity:
-                                        ListTileControlAffinity.leading,
+                                            ListTileControlAffinity.leading,
                                       ),
                                       Divider(color: Colors.grey.shade300),
                                       CheckboxListWidget(
@@ -394,78 +385,80 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           setModalState(() {});
                                         },
                                         controlAffinity:
-                                        ListTileControlAffinity.leading,
+                                            ListTileControlAffinity.leading,
                                       ),
                                       vm.selectedDeliveryMethods.contains(
-                                        'expedition',
-                                      )
+                                            'expedition',
+                                          )
                                           ? Padding(
-                                        padding:
-                                        const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: TextInputWidget(
-                                                controller: expeditionWeightController,
-                                                hintText: 'Berat barang',
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 20,
+                                                  ),
+                                              child: Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: TextInputWidget(
+                                                      controller:
+                                                          expeditionWeightController,
+                                                      hintText: 'Berat barang',
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 8),
+                                                  Text('kg'),
+                                                ],
                                               ),
-                                            ),
-                                            SizedBox(width: 8),
-                                            Text('kg'),
-                                          ],
-                                        ),
-                                      )
+                                            )
                                           : SizedBox(),
                                       SizedBox(height: 20),
                                       vm.selectedDeliveryMethods.contains(
-                                        'expedition',
-                                      )
+                                            'expedition',
+                                          )
                                           ? Padding(
-                                        padding:
-                                        const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Pilih Kurir Ekspedisi',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                            SizedBox(height: 10),
-                                            Wrap(
-                                              spacing: 8,
-                                              runSpacing: 8,
-                                              children: vm.expeditions.map((
-                                                  expedition,) {
-                                                return ChipWidget(
-                                                  label: expedition
-                                                      .courierName,
-
-                                                  onSelected: (value) {
-                                                    vm.toggleExpedition(
-                                                      expedition.id,
-                                                    );
-
-                                                    setModalState(() {});
-                                                  },
-
-                                                  isSelected: vm
-                                                      .selectedExpeditions
-                                                      .contains(
-                                                    expedition.id,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 20,
                                                   ),
-                                                );
-                                              }).toList(),
-                                            ),
-                                          ],
-                                        ),
-                                      )
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Pilih Kurir Ekspedisi',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 10),
+                                                  Wrap(
+                                                    spacing: 8,
+                                                    runSpacing: 8,
+                                                    children: vm.expeditions.map((
+                                                      expedition,
+                                                    ) {
+                                                      return ChipWidget(
+                                                        label: expedition
+                                                            .courierName,
+
+                                                        onSelected: (value) {
+                                                          vm.toggleExpedition(
+                                                            expedition.id,
+                                                          );
+
+                                                          setModalState(() {});
+                                                        },
+
+                                                        isSelected: vm
+                                                            .selectedExpeditions
+                                                            .contains(
+                                                              expedition.id,
+                                                            ),
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
                                           : SizedBox(),
                                     ],
                                   );
@@ -486,12 +479,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               context: context,
                               title: 'Pilih Metode Pengembalian',
                               description:
-                              'Pilih metode yang dapat digunakan oleh penyewa',
+                                  'Pilih metode yang dapat digunakan oleh penyewa',
                               child: StatefulBuilder(
                                 builder: (context, setModalState) {
                                   return Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       CheckboxListWidget(
                                         title: 'Diantar Sendiri',
@@ -502,7 +495,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           setModalState(() {});
                                         },
                                         controlAffinity:
-                                        ListTileControlAffinity.leading,
+                                            ListTileControlAffinity.leading,
                                       ),
                                       Divider(color: Colors.grey.shade300),
                                       CheckboxListWidget(
@@ -511,12 +504,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             .contains('seller_pickup'),
                                         onChanged: (value) {
                                           vm.toggleReturnMethod(
-                                              'seller_pickup');
+                                            'seller_pickup',
+                                          );
 
                                           setModalState(() {});
                                         },
                                         controlAffinity:
-                                        ListTileControlAffinity.leading,
+                                            ListTileControlAffinity.leading,
                                       ),
                                       Divider(color: Colors.grey.shade300),
                                       CheckboxListWidget(
@@ -525,11 +519,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             .contains('expedition_return'),
                                         onChanged: (value) {
                                           vm.toggleReturnMethod(
-                                              'expedition_return');
+                                            'expedition_return',
+                                          );
                                           setModalState(() {});
                                         },
                                         controlAffinity:
-                                        ListTileControlAffinity.leading,
+                                            ListTileControlAffinity.leading,
                                       ),
                                     ],
                                   );
@@ -628,17 +623,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   isEnabled: true,
                   isLoading: vm.isLoading,
                   onPressed: () async {
-                    final result = await vm.createProduct(context: context,
-                        productNameController: productNameController,
-                        descriptionController: proudctDescriptionController,
-                        priceController: productPriceController,
-                        stockController: productStockController,
-                        depositController: depositController,
-                        additionalNotesController: rentRuleController,
-                        expeditionWeightController: expeditionWeightController,
+                    final result = await vm.createProduct(
+                      context: context,
+                      productNameController: productNameController,
+                      descriptionController: proudctDescriptionController,
+                      priceController: productPriceController,
+                      stockController: productStockController,
+                      depositController: depositController,
+                      additionalNotesController: rentRuleController,
+                      expeditionWeightController: expeditionWeightController,
                     );
-                    if(result != null){
-                      Toast().showToast(context, result!);
+                    if (result != null) {
+                      Toast().showToast(context, result);
                     }
                   },
                 ),

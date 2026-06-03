@@ -7,14 +7,14 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey,
-      body: Center(
-        child: LoadingAnimationWidget.discreteCircle(
-          color: Colors.white,
-          size: 36
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: LoadingAnimationWidget.discreteCircle(
+            color: themeData.primaryColor,
+            size: 36
+          ),
         ),
-      ),
-    );
+      );
   }
 }

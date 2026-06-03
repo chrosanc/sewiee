@@ -9,6 +9,8 @@ import 'package:sewiee/data/model/user_model.dart';
 import 'package:sewiee/domain/repositories/category_repository.dart';
 import 'package:sewiee/domain/repositories/product_repository.dart';
 import 'package:sewiee/domain/repositories/user_repository.dart';
+import 'package:sewiee/main.dart';
+import 'package:sewiee/presentation/widget/loading/loading_manager.dart';
 
 class ManageMerchantViewmodel extends ChangeNotifier {
   // =========================
@@ -50,24 +52,24 @@ class ManageMerchantViewmodel extends ChangeNotifier {
 
   // BELOM ADA
 
-  // =========================
-  // BOOLEAN
-  // =========================
-  bool isLoading = false;
+  /// =========================
+  /// LOADING VARIABLE
+  /// =========================
+  final LoadingManager _loadingManager = serviceLocator<LoadingManager>();
+  void _showLoadingDialog() => _loadingManager.showLoading();
+  void _hideLoadingDialog() => _loadingManager.hideLoading();
 
   // =========================
   // USER FUNCTION
   // =========================
   Future<void> getUser(BuildContext context) async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
     try {
       userModel = await userRepository.getCurrentUser();
     } catch (e) {
       Toast().showToast(context, e.toString());
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
@@ -111,34 +113,31 @@ class ManageMerchantViewmodel extends ChangeNotifier {
   // GET PRODUCT FUNCTION
 
   Future<void> getCategories(BuildContext context) async{
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
       categories = await categoryRepository.fetchCategories();
     } catch(e) {
       Toast().showToast(context, e.toString());
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
   Future<void> getProductByCurrentUser(BuildContext context) async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
       if (userModel != null) {
         listProduct = await productRepository.getProductsByOwner(
           userModel!.uid,
         );
+        notifyListeners();
       }
     } catch (e) {
       Toast().showToast(context, e.toString());
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
@@ -161,8 +160,7 @@ class ManageMerchantViewmodel extends ChangeNotifier {
   }
 
   Future<void> refreshProduct(BuildContext context) async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
       productModel = await productRepository.getProductById(productModel!.id);
@@ -170,15 +168,13 @@ class ManageMerchantViewmodel extends ChangeNotifier {
     } catch (e) {
       Toast().showToast(context, e.toString());
     } finally{
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
   // SET PRODUCT FUNCTION
   Future<bool> setProductActive(BuildContext context) async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     final newStatus = !productModel!.active;
 
@@ -194,14 +190,12 @@ class ManageMerchantViewmodel extends ChangeNotifier {
       Toast().showToast(context, e.toString());
       return false;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
   Future<bool> deleteProduct(BuildContext context) async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
     try {
       await productRepository.deleteAllImages(productModel!.id);
       await productRepository.deleteProduct(productModel!.id);
@@ -211,8 +205,7 @@ class ManageMerchantViewmodel extends ChangeNotifier {
       Toast().showToast(context, e.toString());
       return false;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
@@ -231,8 +224,7 @@ class ManageMerchantViewmodel extends ChangeNotifier {
 
     if(productModel == null) return false;
 
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
 
@@ -282,8 +274,7 @@ class ManageMerchantViewmodel extends ChangeNotifier {
       return false;
     } finally {
 
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
 
     }
   }
@@ -329,8 +320,7 @@ class ManageMerchantViewmodel extends ChangeNotifier {
       TextEditingController depositController,
       ) async {
 
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
 
@@ -349,8 +339,7 @@ class ManageMerchantViewmodel extends ChangeNotifier {
       );
 
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 

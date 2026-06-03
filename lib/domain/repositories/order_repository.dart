@@ -1,0 +1,82 @@
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:sewiee/data/model/order_model.dart';
+import 'package:sewiee/data/model/payment_model.dart';
+import 'package:sewiee/data/services/order_service.dart';
+import 'package:sewiee/domain/enum/order_status.dart';
+
+class OrderRepository {
+  final OrderService _service = OrderService();
+
+  Future<void> createOrder(OrderModel orderData) async {
+    try {
+      return await _service.createOrder(orderData);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String> generateOrderNumber() async {
+    try {
+      return await _service.generateOrderNumber();
+    } on FirebaseFunctionsException {
+      rethrow;
+    }
+  }
+
+  Future<MidtransTransactionResponseModel?> createTransaction(
+    TransactionModel model,
+  ) async {
+    try {
+      return await _service.createTransaction(model);
+    } on FirebaseFunctionsException {
+      rethrow;
+    }
+  }
+
+  Future<List<OrderModel>> getOrderByRenterId(String userId) async {
+    try {
+      return await _service.getOrderByUserId(userId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Stream<List<OrderModel>> streamOrderByRenterId(String userId) {
+    return _service.streamOrderByRenterId(userId);
+  }
+
+  Stream<List<OrderModel>> streamOrderByOwnerId(String ownerId) {
+    return _service.streamOrderByOwnerId(ownerId);
+  }
+
+  Future<void> updateOrderStatus({
+    required String orderId,
+    required OrderStatus newStatus,
+  }) {
+    return _service.updateOrderStatus(orderId: orderId, newStatus: newStatus);
+  }
+
+  Future<void> updateRentDate({
+    required String orderId,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _service.updateRentDate(
+      orderId: orderId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+  }
+
+  Future<void> updateDeliveryReceiptNumber({
+    required String orderId,
+    required String receiptNumber,
+  }) {
+    return _service.updateDeliveryReceiptNumber(
+      orderId: orderId,
+      receiptNumber: receiptNumber,
+    );
+  }
+
+  // Future<void> updateInspection({required String orderId, required fine}) {}
+}

@@ -191,7 +191,7 @@ class _CreateAddressScreenState extends State<CreateAddressScreen> {
                           PrimaryButton(
                             label: 'Pilih Lokasi',
                             isEnabled: true,
-                            isLoading: vm.isLoading,
+                            isLoading: false,
                             onPressed: () async {
                               Navigator.pop(
                                 context,

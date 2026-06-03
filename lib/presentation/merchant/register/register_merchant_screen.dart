@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:sewiee/app/theme.dart';
 import 'package:sewiee/presentation/register/register_viewmodel.dart';
 import 'package:sewiee/presentation/widget/button_widget.dart';
-import 'package:sewiee/presentation/widget/dropdown_widget.dart';
 import 'package:sewiee/presentation/widget/text_input_widget.dart';
 
 class RegisterMerchantScreen extends StatefulWidget {

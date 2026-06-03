@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sewiee/presentation/main/main_screen.dart';
 
 class SuccessPage extends StatelessWidget {
   final String? title;

@@ -11,4 +11,28 @@ class ExpeditionRepository {
       rethrow;
     }
   }
+
+  Future<List<ExpeditionModel>> getExpeditionsById(List<String> ids) async {
+    try {
+      return await service.getCourierById(ids);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<String?> getVillageCode(String postalCode, String villageName) async {
+    try{
+      return await service.getVillageCode(postalCode, villageName);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<ShippingCostModel>> getShippingCost(String destinationVillageCode , String originVillageCode, int weight) async {
+    try{
+      return await service.getShippingCost(destinationVillageCode, originVillageCode, weight);
+    } catch (e){
+      rethrow;
+    }
+  }
 }

@@ -8,13 +8,17 @@ import 'package:sewiee/data/model/address_model.dart';
 import 'package:sewiee/data/model/user_model.dart';
 import 'package:sewiee/domain/repositories/address_repository.dart';
 import 'package:sewiee/domain/repositories/user_repository.dart';
+import 'package:sewiee/main.dart';
+import 'package:sewiee/presentation/widget/loading/loading_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class AddressViewmodel extends ChangeNotifier {
   /// =========================
   /// GENERAL VARIABLE
   /// =========================
-  bool isLoading = false;
+  final LoadingManager _loadingManager = serviceLocator<LoadingManager>();
+  void _showLoadingDialog() => _loadingManager.showLoading();
+  void _hideLoadingDialog() => _loadingManager.hideLoading();
 
   /// =========================
   /// USER VARIABLE
@@ -72,15 +76,13 @@ class AddressViewmodel extends ChangeNotifier {
   /// =========================
 
   Future<void> getCurrentUser() async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
     try {
       userModel = await userRepository.getCurrentUser();
     } catch (e) {
       rethrow;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
@@ -94,8 +96,7 @@ class AddressViewmodel extends ChangeNotifier {
   }
 
   Future<LatLng?> getCurrentLocation() async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     bool serviceEnabled;
     LocationPermission permission;
@@ -122,8 +123,7 @@ class AddressViewmodel extends ChangeNotifier {
     } catch (e) {
       rethrow;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
@@ -137,20 +137,16 @@ class AddressViewmodel extends ChangeNotifier {
   /// =========================
   /// ADDRESS FUNCTIONS
   /// =========================
-
-
-
   Future<void> getUserAddresses() async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
       addresses = await addressRepository.getUserAddresses(userModel!.uid);
+      notifyListeners();
     } catch (e) {
       rethrow;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
@@ -163,8 +159,7 @@ class AddressViewmodel extends ChangeNotifier {
   }
 
   Future<void> getAddressFromLatLng(double latitude, double longitude) async {
-    isLoading = true;
-    notifyListeners();
+   _showLoadingDialog();
 
     try {
       final placemarks = await placemarkFromCoordinates(latitude, longitude);
@@ -226,8 +221,7 @@ class AddressViewmodel extends ChangeNotifier {
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
@@ -243,8 +237,7 @@ class AddressViewmodel extends ChangeNotifier {
 
     final String addressId = Uuid().v4();
 
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
       addressModel = addressModel!.copyWith(
@@ -263,8 +256,7 @@ class AddressViewmodel extends ChangeNotifier {
       debugPrint(e.toString());
       return false;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
@@ -278,8 +270,7 @@ class AddressViewmodel extends ChangeNotifier {
       return false;
     }
 
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
       addressModel = addressModel!.copyWith(
@@ -295,14 +286,12 @@ class AddressViewmodel extends ChangeNotifier {
       debugPrint(e.toString());
       return false;
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
   Future<void> deleteUserAddress(BuildContext context, String addressId) async{
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
     try{
       await addressRepository.deleteUserAddress(userModel!.uid, addressId);
       Navigator.pop(context);
@@ -310,8 +299,7 @@ class AddressViewmodel extends ChangeNotifier {
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 

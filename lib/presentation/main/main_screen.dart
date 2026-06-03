@@ -6,11 +6,10 @@ import 'package:sewiee/presentation/explore/explore_screen.dart';
 import 'package:sewiee/presentation/home/home_screen.dart';
 import 'package:sewiee/presentation/main/main_viewmodel.dart';
 import 'package:sewiee/presentation/order/order_screen.dart';
-import 'package:sewiee/presentation/products/products_screen.dart';
 import 'package:sewiee/presentation/widget/navigation.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();

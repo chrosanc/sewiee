@@ -8,7 +8,6 @@ import 'package:sewiee/data/model/category_model.dart';
 import 'package:sewiee/presentation/merchant/manage/manage_merchant_viewmodel.dart';
 import 'package:sewiee/presentation/widget/add_photos_widget.dart';
 import 'package:sewiee/presentation/widget/dropdown_widget.dart';
-import 'package:sewiee/presentation/widget/loading_widget.dart';
 import 'package:sewiee/presentation/widget/multiline_text_widget.dart';
 import 'package:sewiee/presentation/widget/text_input_widget.dart';
 
@@ -55,10 +54,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
   Widget build(BuildContext context) {
     final vm = Provider.of<ManageMerchantViewmodel>(context);
 
-    if (vm.isLoading) {
-      return LoadingWidget();
-    }
-
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
@@ -69,11 +64,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.only(bottom: 30, top: 5),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
             children: [
               Padding(
-                padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
+                padding: EdgeInsetsGeometry.symmetric(horizontal: 5),
                 child: IconButton(
                   onPressed: () {
                     showDialog(
@@ -112,7 +107,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       },
                     );
                   },
-                  icon: Icon(Icons.delete_outline, size: 30, color: Colors.grey),
+                  icon: Icon(Icons.delete_outline, size: 25, color: Colors.grey),
                 ),
               ),
               Expanded(
@@ -142,9 +137,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   ),
                   child: Text(
                     vm.productModel!.active
-                        ? 'Nonaktifkan Produk'
-                        : 'Aktifkan Produk',
+                        ? 'Nonaktifkan'
+                        : 'Aktifkan',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
+                      fontSize: 12,
                       color: vm.productModel!.active ? Colors.red : Colors.green,
                     ),
                   ),
@@ -210,10 +207,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     );
                   },
                   child: Text(
-                    'Konfirmasi Ubah',
+                    'Konfirmasi',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
+                      fontSize: 12,
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),

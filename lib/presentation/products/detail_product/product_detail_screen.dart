@@ -3,11 +3,13 @@ import 'package:gap/gap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fa6_regular.dart';
-import 'package:iconify_flutter/icons/fa6_solid.dart';
 import 'package:provider/provider.dart';
 import 'package:sewiee/app/theme.dart';
+import 'package:sewiee/app/utils/currency_utils.dart';
+import 'package:sewiee/app/utils/toast.dart';
 import 'package:sewiee/presentation/home/home_viewmodel.dart';
 import 'package:sewiee/presentation/order/checkout/checkout_screen.dart';
+import 'package:sewiee/presentation/order/checkout/checkout_viewmodel.dart';
 import 'package:sewiee/presentation/products/product_viewmodel.dart';
 import 'package:sewiee/presentation/widget/bottomsheet/bottom_sheet_widget.dart';
 import 'package:sewiee/presentation/widget/button_widget.dart';
@@ -16,9 +18,8 @@ import 'package:sewiee/presentation/widget/product/product_card.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ProductDetailScreen extends StatefulWidget {
-  final String productId;
 
-  const ProductDetailScreen({super.key, required this.productId});
+  const ProductDetailScreen({super.key});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -27,7 +28,6 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool isExpanded = false;
   GoogleMapController? mapController;
-
   late final PageController pageController;
 
   @override
@@ -37,11 +37,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     pageController = PageController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProductViewmodel>().getDetailedProduct(
-        context,
-        widget.productId,
-      );
-
       context.read<HomeViewModel>().getAllProducts(context);
     });
   }
@@ -57,15 +52,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final vm = Provider.of<ProductViewmodel>(context);
 
     final vmHome = Provider.of<HomeViewModel>(context);
+    final vmCheckout = Provider.of<CheckoutViewmodel>(context);
 
-    if (vm.isLoading || vm.product == null) {
-      return const LoadingWidget();
+
+    final product = vm.product;
+    if(product == null){
+      return LoadingWidget();
     }
-
-    final product = vm.product!;
-
     final randomProducts =
-        vmHome.products.where((e) => e.id != product.id).toList()..shuffle();
+        vmHome.products.where((e) => e.id != product.id && e.active == true).toList()..shuffle();
 
     return Scaffold(
       appBar: AppBar(
@@ -81,10 +76,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             isEnabled: true,
             isLoading: false,
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CheckoutScreen()),
-              );
+              if (vm.product != null) {
+                vmCheckout.setSelectedProduct(vm.product!);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CheckoutScreen()),
+                );
+              } else {
+                Toast().showToast(context, 'Produk tidak tersedia');
+                Navigator.pop(context);
+              }
             },
           ),
         ),
@@ -138,14 +139,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Row(
                     children: [
                       Text(
-                        'Rp',
-                        style: TextStyle(color: themeData.primaryColor),
-                      ),
-
-                      const SizedBox(width: 5),
-
-                      Text(
-                        product.price.toString(),
+                        CurrencyUtils().toRupiah(vm.product!.price),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -275,12 +269,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Divider(color: Colors.grey.shade300),
                     ListTile(
                       title: Text(
-                        'Wajib deposit Rp${vm.product!.rentalTerms.depositAmount}',
+                        'Wajib deposit ${CurrencyUtils().toRupiah(vm.product!.rentalTerms.depositAmount)}',
                         style: TextStyle(fontSize: 12),
                       ),
                       leading: Iconify(Fa6Regular.money_bill_1),
                     ),
-                    // Text('Aturan Tambahan', style: TextStyle(fontSize: 12)),
+                    // Text('Aturan Tambahan', style: TextStyle(fontSize: 12)),S
                     Gap(10),
                     Column(
                       children: [
@@ -307,7 +301,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 12),
               ),
-              description: product.description
+              description: product.description,
             ),
 
             Divider(thickness: 10, color: Colors.blueGrey.shade50),
@@ -320,7 +314,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   const Text(
                     'Produk Lainnya',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                   ),
 
                   const SizedBox(height: 10),
@@ -356,12 +350,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             imageUrl: anotherProduct.images.first,
 
                             onTap: () {
+                              context.read<ProductViewmodel>().getDetailedProduct(context, anotherProduct.id);
                               Navigator.pushReplacement(
                                 context,
 
                                 MaterialPageRoute(
                                   builder: (context) => ProductDetailScreen(
-                                    productId: anotherProduct.id,
                                   ),
                                 ),
                               );
@@ -380,7 +374,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _descriptionSectionText({required String title, required Widget content, String? description}) {
+  Widget _descriptionSectionText({
+    required String title,
+    required Widget content,
+    String? description,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
 
@@ -390,7 +388,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
           ),
           Gap(10),
 
@@ -407,7 +405,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(description ?? 'Tidak ada Deskripsi', style: TextStyle(fontSize: 12),),
+                  child: Text(
+                    description ?? 'Tidak ada Deskripsi',
+                    style: TextStyle(fontSize: 12),
+                  ),
                 ),
               );
             },
@@ -437,7 +438,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
           ),
           Gap(10),
 

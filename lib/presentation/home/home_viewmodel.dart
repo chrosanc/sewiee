@@ -7,17 +7,21 @@ import 'package:sewiee/data/model/product_model.dart';
 import 'package:sewiee/data/model/user_model.dart';
 import 'package:sewiee/data/services/category_service.dart';
 import 'package:sewiee/data/services/product_service.dart';
+import 'package:sewiee/main.dart';
+import 'package:sewiee/presentation/widget/loading/loading_manager.dart';
 
-class HomeViewModel extends ChangeNotifier{
+class HomeViewModel extends ChangeNotifier {
+  final LoadingManager _loadingManager = serviceLocator<LoadingManager>();
 
   // FIREBASE
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   UserModel? userProfile;
 
-  // BOOL
+  // LOADING
   bool isLoading = false;
-
+  void _showLoadingDialog() => _loadingManager.showLoading();
+  void _hideLoadingDialog() => _loadingManager.hideLoading();
 
   // PRODUCT
   final ProductService productService = ProductService();
@@ -30,23 +34,21 @@ class HomeViewModel extends ChangeNotifier{
 
 
   Future<void> getCategory() async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     try {
       categories = await categoryService.getCategories();
+      notifyListeners();
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
 
   Future<void> getAllProducts(context) async{
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
     try {
       products = await productService.getProducts();
       activeProducts = products.where((product) => product.active).toList();
@@ -55,15 +57,13 @@ class HomeViewModel extends ChangeNotifier{
     } catch (e) {
       Toast().showToast(context, e.toString());
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 
 
   Future<void> getUser(BuildContext context) async {
-    isLoading = true;
-    notifyListeners();
+    _showLoadingDialog();
 
     final String user = _auth.currentUser!.uid;
 
@@ -71,12 +71,12 @@ class HomeViewModel extends ChangeNotifier{
       final doc = await _firestore.collection('users').doc(user).get();
       if(doc.exists) {
         userProfile = UserModel.fromJson(doc.data()!);
+        notifyListeners();
       }
     } catch (e) {
       Toast().showToast(context, e.toString());
     } finally {
-      isLoading = false;
-      notifyListeners();
+      _hideLoadingDialog();
     }
   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sewiee/app/theme.dart';
 
 class CheckboxListWidget extends StatelessWidget {
   final bool value;

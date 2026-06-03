@@ -32,7 +32,7 @@ class DropdownWidget<T> extends StatelessWidget {
           ),
         const SizedBox(height: 6),
         DropdownButtonFormField<T>(
-          value: selectedValue,
+          initialValue: selectedValue,
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down_rounded),
           items: items.map((item) {

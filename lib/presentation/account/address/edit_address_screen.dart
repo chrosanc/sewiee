@@ -9,7 +9,6 @@ import 'package:sewiee/app/utils/toast.dart';
 import 'package:sewiee/data/model/address_model.dart';
 import 'package:sewiee/presentation/account/address/create_address_screen.dart';
 import 'package:sewiee/presentation/widget/button_widget.dart';
-import 'package:sewiee/presentation/widget/loading_widget.dart';
 import 'package:sewiee/presentation/widget/multiline_text_widget.dart';
 import 'package:sewiee/presentation/widget/text_input_widget.dart';
 
@@ -94,10 +93,6 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
   Widget build(BuildContext context) {
     final vm = Provider.of<AddressViewmodel>(context);
 
-    if (vm.isLoading) {
-      return LoadingWidget();
-    }
-
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       bottomNavigationBar: Container(
@@ -107,7 +102,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
           child: PrimaryButton(
             label: 'Simpan',
             isEnabled: isFormValid,
-            isLoading: vm.isLoading,
+            isLoading: false,
             onPressed: () async {
               final isEdit = widget.addressId != null;
               final result = isEdit

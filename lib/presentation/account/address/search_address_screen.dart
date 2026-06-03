@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_places_sdk_flutter/google_places_sdk_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:sewiee/app/theme.dart';
 import 'package:sewiee/presentation/account/address/address_viewmodel.dart';
-import 'package:sewiee/presentation/widget/search_widget.dart';
 
 class SearchAddressScreen extends StatefulWidget {
   const SearchAddressScreen({super.key});

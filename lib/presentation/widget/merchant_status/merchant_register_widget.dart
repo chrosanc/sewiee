@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sewiee/app/theme.dart';
-import 'package:sewiee/presentation/widget/button_widget.dart';
 
 class MerchantRegisterWidget extends StatelessWidget {
   final Function() onTap;

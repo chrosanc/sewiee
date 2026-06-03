@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:sewiee/app/theme.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String label;
@@ -10,7 +10,7 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
 
@@ -18,9 +18,8 @@ class PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: isEnabled ? const Color(0xFFFFB113) : Colors.grey,
-          padding: const EdgeInsets.symmetric(vertical: 18),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: isLoading
@@ -34,11 +33,63 @@ class PrimaryButton extends StatelessWidget {
         )
             : Text(
           label,
-          style: GoogleFonts.poppins(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: 12,
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class SecondaryButton extends StatelessWidget {
+
+  final bool isActive;
+  final String label;
+
+  final Function() onPressed;
+
+  const SecondaryButton({
+    super.key,
+    required this.isActive,
+    required this.onPressed, required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    final Color buttonColor =
+    isActive ? themeData.primaryColor : Colors.red;
+
+    return OutlinedButton(
+      onPressed: onPressed,
+
+      style: ButtonStyle(
+        side: WidgetStatePropertyAll(
+          BorderSide(
+            color: buttonColor,
+          ),
+        ),
+
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      ),
+
+      child: Text(
+        label,
+
+        textAlign: TextAlign.center,
+
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: buttonColor,
         ),
       ),
     );
