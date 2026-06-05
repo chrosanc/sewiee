@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ManageMerchantViewmodel()),
         ChangeNotifierProvider(create: (_) => AddressViewmodel()),
         ChangeNotifierProvider(create: (_) => CheckoutViewmodel()),
+        ChangeNotifierProvider(create: (_) => OrderViewmodel()),
       ],
       child: MaterialApp(
         navigatorKey: MyApp.navigatorKey,
