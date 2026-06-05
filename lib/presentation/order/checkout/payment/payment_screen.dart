@@ -9,6 +9,7 @@ import 'package:sewiee/app/utils/date_format.dart';
 import 'package:sewiee/app/utils/toast.dart';
 import 'package:sewiee/data/model/payment_model.dart';
 import 'package:sewiee/presentation/order/checkout/checkout_viewmodel.dart';
+import 'package:sewiee/presentation/order/payment_success/payment_success_screen.dart';
 import 'package:sewiee/presentation/widget/button_widget.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -46,10 +47,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           paymentStatusText = 'Pembayaran Berhasil!';
           
           // Navigate ke halaman order success
-          Navigator.of(context).pushNamedAndRemoveUntil(
-            '/order-success',
-            (route) => false,
-          );
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => PaymentSuccessScreen()));
         } else {
           paymentStatusText = 'Menunggu Pembayaran...';
         }
