@@ -482,6 +482,10 @@ class AddProductViewmodel extends ChangeNotifier {
 
         storeName: userModel!.storeName,
 
+        storeUsername: userModel!.storeUsername,
+
+        phoneNumber: userModel!.phoneNumber,
+
         productName: productNameController.text.trim(),
 
         description: descriptionController.text.trim(),

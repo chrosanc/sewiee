@@ -11,6 +11,8 @@ class ProductModel {
   final String ownerName;
 
   final String storeName;
+  final String storeUsername;
+  final String phoneNumber;
 
   final String productName;
   final String description;
@@ -68,6 +70,8 @@ class ProductModel {
     required this.ownerName,
 
     required this.storeName,
+    required this.storeUsername,
+    required this.phoneNumber,
 
     required this.productName,
     required this.description,
@@ -106,6 +110,8 @@ class ProductModel {
       ownerName: json['owner_name'] ?? '',
 
       storeName: json['store_name'] ?? '',
+      storeUsername: json['store_username'] ?? '',
+      phoneNumber: json['phone_number'] ?? '',
 
       productName: json['product_name'] ?? '',
       description: json['description'] ?? '',
@@ -149,6 +155,8 @@ class ProductModel {
       "owner_name": ownerName,
 
       "store_name": storeName,
+      "store_username": storeUsername,
+      "phone_number": phoneNumber,
 
       "product_name": productName,
       "description": description,
@@ -189,6 +197,8 @@ class ProductModel {
     String? ownerName,
 
     String? storeName,
+    String? storeUsername,
+    String? phoneNumber,
 
     String? productName,
     String? description,
@@ -222,6 +232,8 @@ class ProductModel {
       ownerName: ownerName ?? this.ownerName,
 
       storeName: storeName ?? this.storeName,
+      storeUsername: storeUsername ?? this.storeUsername,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
 
       productName: productName ?? this.productName,
 

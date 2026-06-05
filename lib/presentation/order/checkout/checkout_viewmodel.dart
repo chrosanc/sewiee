@@ -269,7 +269,10 @@ class CheckoutViewmodel extends ChangeNotifier {
 
     final int depositAmount = productModel?.rentalTerms.depositAmount ?? 0;
 
-    final int shippingPrice = selectedCourier?.price ?? 0;
+    // Ongkir hanya masuk jika metode pengiriman adalah ekspedisi DAN sudah memilih ekspedisi
+    final int shippingPrice = selectedDeliveryMethod == 'expedition' && selectedCourier != null
+        ? selectedCourier!.price
+        : 0;
 
     totalPrice =
         productPrice +
@@ -367,8 +370,11 @@ class CheckoutViewmodel extends ChangeNotifier {
 
         ownerSnapshot: UserSnapshot(
           id: productModel!.ownerId,
-          name: productModel!.storeName,
-          username: productModel!.storeName,
+          name: productModel!.storeName ?? '',
+          username: productModel!.storeUsername ?? '',
+          storeName: productModel!.storeName,
+          storeUsername: productModel!.storeUsername,
+          phoneNumber: productModel!.phoneNumber,
         ),
 
         // PRODUCT
@@ -423,7 +429,10 @@ class CheckoutViewmodel extends ChangeNotifier {
           amount: Amount(
             productPrice: productModel!.price * rentDurationCount,
 
-            deliveryFee: selectedCourier?.price ?? 0,
+            // Ongkir hanya masuk jika metode pengiriman adalah ekspedisi DAN sudah memilih ekspedisi
+            deliveryFee: selectedDeliveryMethod == 'expedition' && selectedCourier != null
+                ? selectedCourier!.price
+                : 0,
 
             depositAmount: productModel!.rentalTerms.depositAmount,
 
