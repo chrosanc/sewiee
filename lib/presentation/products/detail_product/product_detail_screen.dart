@@ -175,12 +175,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   const SizedBox(height: 5),
 
-                  Text(
-                    product.categoryName,
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                  // Wrap category in constrained box to prevent overflow
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: double.infinity),
+                    child: Text(
+                      product.categoryName,
+                      style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
 
@@ -189,14 +195,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        product.storeName,
-                        style: const TextStyle(fontSize: 12),
+                      // Wrap store name to prevent overflow
+                      Expanded(
+                        child: Text(
+                          product.storeName,
+                          style: const TextStyle(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
 
-                      Text(
-                        '${product.address.regency!.replaceAll('Kabupaten', '')}, ${product.address.province}',
-                        style: const TextStyle(fontSize: 12),
+                      // Wrap location text with proper constraints
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 150),
+                        child: Text(
+                          '${product.address.regency!.replaceAll('Kabupaten', '')}, ${product.address.province}',
+                          style: const TextStyle(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -256,35 +273,54 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 vm.product!.rentalTerms.additionalNotes.isNotEmpty)
               _sectionText(
                 title: 'Aturan Sewa',
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListTile(
-                      title: Text(
-                        'Wajib menggunakan Identitas',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      leading: Icon(Icons.perm_contact_calendar_outlined),
-                    ),
-                    Divider(color: Colors.grey.shade300),
-                    ListTile(
-                      title: Text(
-                        'Wajib deposit ${CurrencyUtils().toRupiah(vm.product!.rentalTerms.depositAmount)}',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      leading: Iconify(Fa6Regular.money_bill_1),
-                    ),
-                    // Text('Aturan Tambahan', style: TextStyle(fontSize: 12)),S
-                    Gap(10),
-                    Column(
+                content: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: double.infinity),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          vm.product!.rentalTerms.additionalNotes,
-                          style: TextStyle(fontSize: 12),
+                        // Wrap ListTile with constrained width for identity
+                        SizedBox(
+                          width: double.maxFinite,
+                          child: ListTile(
+                            title: Text(
+                              'Wajib menggunakan Identitas',
+                              style: TextStyle(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            leading: Icon(Icons.perm_contact_calendar_outlined),
+                          ),
+                        ),
+                        Divider(color: Colors.grey.shade300),
+                        // Wrap ListTile with constrained width for deposit
+                        SizedBox(
+                          width: double.maxFinite,
+                          child: ListTile(
+                            title: Text(
+                              'Wajib deposit ${CurrencyUtils().toRupiah(vm.product!.rentalTerms.depositAmount)}',
+                              style: TextStyle(fontSize: 12),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            leading: Iconify(Fa6Regular.money_bill_1),
+                          ),
+                        ),
+                        Gap(10),
+                        // Wrap additional notes in constrained box
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: double.infinity),
+                          child: Text(
+                            vm.product!.rentalTerms.additionalNotes,
+                            style: TextStyle(fontSize: 12),
+                            maxLines: null,
+                            overflow: TextOverflow.visible,
+                          ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               )
             else
@@ -295,11 +331,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             /// DESCRIPTION
             _descriptionSectionText(
               title: 'Detail Produk',
-              content: Text(
-                product.description,
-                maxLines: 5,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12),
+              content: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: double.infinity),
+                  child: Text(
+                    product.description,
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
               ),
               description: product.description,
             ),
@@ -392,7 +434,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
           Gap(10),
 
-          content,
+          // Wrap content in constrained box to prevent overflow
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: content,
+            ),
+          ),
 
           const SizedBox(height: 10),
 
@@ -442,7 +491,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
           Gap(10),
 
-          content,
+          // Wrap content in constrained box to prevent overflow
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: double.infinity),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: content,
+            ),
+          ),
 
           const SizedBox(height: 10),
 
