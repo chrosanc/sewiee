@@ -14,13 +14,14 @@ import 'package:sewiee/presentation/login/login_viewmodel.dart';
 import 'package:sewiee/presentation/main/main_viewmodel.dart';
 import 'package:sewiee/presentation/merchant/manage/manage_merchant_viewmodel.dart';
 import 'package:sewiee/presentation/merchant/register/register_merchant_viewmodel.dart';
-import 'package:sewiee/presentation/order/checkout/checkout_viewmodel.dart';
 import 'package:sewiee/presentation/order/order_viewmodel.dart';
 import 'package:sewiee/presentation/products/product_viewmodel.dart';
 import 'package:sewiee/presentation/register/register_viewmodel.dart';
 import 'package:sewiee/presentation/splash/splash_screen.dart';
 import 'package:sewiee/presentation/widget/loading/dialog_manager.dart';
 import 'package:sewiee/presentation/widget/loading/loading_manager.dart';
+
+import 'presentation/order/checkout/checkout_viewmodel.dart';
 
 Future<void> main() async {
   setupLocator();
@@ -65,7 +66,6 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ManageMerchantViewmodel()),
         ChangeNotifierProvider(create: (_) => AddressViewmodel()),
         ChangeNotifierProvider(create: (_) => CheckoutViewmodel()),
-        ChangeNotifierProvider(create: (_) => OrderViewmodel()),
       ],
       child: MaterialApp(
         navigatorKey: MyApp.navigatorKey,

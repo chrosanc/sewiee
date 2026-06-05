@@ -20,6 +20,50 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
+  bool isPaymentSuccess = false;
+  String paymentStatusText = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPaymentStatus();
+    });
+  }
+
+  Future<void> _checkPaymentStatus() async {
+    // Cek status dari order model di viewmodel
+    final vm = Provider.of<CheckoutViewmodel>(context, listen: false);
+    
+    if (vm.orderModel != null) {
+      final paymentStatus = vm.orderModel!.payment.paymentStatus;
+      
+      setState(() {
+        isPaymentSuccess = paymentStatus == 'paid' || 
+                           paymentStatus == 'settlement';
+        
+        if (isPaymentSuccess) {
+          paymentStatusText = 'Pembayaran Berhasil!';
+          
+          // Navigate ke halaman order success
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/order-success',
+            (route) => false,
+          );
+        } else {
+          paymentStatusText = 'Menunggu Pembayaran...';
+        }
+      });
+    }
+
+    // Jika masih pending, cek setiap 5 detik
+    if (!isPaymentSuccess && mounted) {
+      Future.delayed(Duration(seconds: 5), () {
+        _checkPaymentStatus();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<CheckoutViewmodel>(context);
