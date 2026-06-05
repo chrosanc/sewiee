@@ -78,5 +78,7 @@ class OrderRepository {
     );
   }
 
-  // Future<void> updateInspection({required String orderId, required fine}) {}
+  Future<void> updateInspection({required String orderId, required int fine, required String status}) {
+    return _service.updateInspection(orderId: orderId, brokenFine: fine, status: status);
+  }
 }

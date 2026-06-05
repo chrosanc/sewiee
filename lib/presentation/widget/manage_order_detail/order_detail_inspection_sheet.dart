@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sewiee/app/screen_theme/order_detail_theme.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_primitives.dart';
 
-Future<String?> showInspectionSheet(
+Future<int?> showInspectionBrokenFineSheet(
     BuildContext context, {
       required TextEditingController controller,
       required OrderModel order,
     }) {
   final formKey = GlobalKey<FormState>();
 
-  return showModalBottomSheet<String>(
+  return showModalBottomSheet<int>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -28,6 +29,7 @@ Future<String?> showInspectionSheet(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Drag handle
               Container(
                 width: 32,
                 height: 3,
@@ -37,6 +39,8 @@ Future<String?> showInspectionSheet(
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
+
+              // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
                 child: Row(
@@ -50,7 +54,7 @@ Future<String?> showInspectionSheet(
                         borderRadius: BorderRadius.circular(9),
                       ),
                       child: const Icon(
-                        Icons.local_shipping_outlined,
+                        Icons.assignment_turned_in_outlined,
                         size: 16,
                         color: OrderDetailTheme.textPrimary,
                       ),
@@ -61,7 +65,7 @@ Future<String?> showInspectionSheet(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Konfirmasi pengiriman',
+                            'Konfirmasi inspeksi',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
@@ -70,7 +74,7 @@ Future<String?> showInspectionSheet(
                           ),
                           SizedBox(height: 2),
                           Text(
-                            'Masukkan nomor resi ekspedisi',
+                            'Masukkan nominal denda jika ada kerusakan',
                             style: TextStyle(
                               fontSize: 11,
                               color: OrderDetailTheme.textMuted,
@@ -95,7 +99,10 @@ Future<String?> showInspectionSheet(
                   ],
                 ),
               ),
+
               const Divider(height: 0.5, color: Color(0xFFF0EEE8)),
+
+              // Body
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
                 child: Form(
@@ -103,10 +110,13 @@ Future<String?> showInspectionSheet(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _ReceiptOrderChip(order: order),
+                      // Order chip
+                      _DendaOrderChip(order: order),
                       const SizedBox(height: 12),
+
+                      // Label
                       const Text(
-                        'Nomor resi',
+                        'Nominal denda',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
@@ -114,23 +124,32 @@ Future<String?> showInspectionSheet(
                         ),
                       ),
                       const SizedBox(height: 6),
+
+                      // Input
                       TextFormField(
                         controller: controller,
                         autofocus: true,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         style: const TextStyle(
                           fontSize: 13,
                           color: OrderDetailTheme.textPrimary,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Contoh: JNE1234567890',
+                          hintText: 'Kosongkan jika tidak ada kerusakan',
                           hintStyle: const TextStyle(
                             fontSize: 13,
                             color: OrderDetailTheme.textDisabled,
                           ),
                           prefixIcon: const Icon(
-                            Icons.barcode_reader,
+                            Icons.monetization_on_outlined,
                             size: 18,
                             color: OrderDetailTheme.textDisabled,
+                          ),
+                          prefixText: 'Rp ',
+                          prefixStyle: const TextStyle(
+                            fontSize: 13,
+                            color: OrderDetailTheme.textPrimary,
                           ),
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
                           filled: true,
@@ -141,40 +160,39 @@ Future<String?> showInspectionSheet(
                           errorBorder: _inputBorder(color: const Color(0xFFE24B4A)),
                         ),
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Nomor resi tidak boleh kosong';
+                          if (value != null && value.trim().isNotEmpty &&
+                              int.tryParse(value.trim()) == null) {
+                            return 'Masukkan angka yang valid';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 5),
+
+                      // Helper text
                       const Row(
                         children: [
                           Icon(Icons.info_outline, size: 12, color: OrderDetailTheme.textDisabled),
                           SizedBox(width: 4),
                           Text(
-                            'Nomor resi akan dikirim ke penyewa otomatis',
+                            'Kosongkan jika barang dalam kondisi baik',
                             style: TextStyle(fontSize: 10, color: OrderDetailTheme.textDisabled),
                           ),
                         ],
                       ),
                       const SizedBox(height: 14),
+
+                      // Buttons
                       Row(
                         children: [
                           Expanded(
-                            child: DialogButton.secondary(
-                              label: 'Batal',
-                              onTap: () => Navigator.pop(context),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
                             flex: 2,
                             child: DialogButton.primary(
-                              label: 'Konfirmasi & kirim',
+                              label: 'Konfirmasi / Tagih denda',
                               onTap: () {
                                 if (formKey.currentState!.validate()) {
-                                  Navigator.pop(context, controller.text.trim());
+                                  final amount = int.tryParse(controller.text.trim()) ?? 0;
+                                  Navigator.pop(context, amount);
                                 }
                               },
                             ),
@@ -203,10 +221,10 @@ OutlineInputBorder _inputBorder({
   );
 }
 
-class _ReceiptOrderChip extends StatelessWidget {
+class _DendaOrderChip extends StatelessWidget {
   final OrderModel order;
 
-  const _ReceiptOrderChip({required this.order});
+  const _DendaOrderChip({required this.order});
 
   @override
   Widget build(BuildContext context) {
@@ -254,15 +272,15 @@ class _ReceiptOrderChip extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: const Color(0xFFEAF3DE),
+              color: const Color(0xFFFEF3C7),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Text(
-              'Ekspedisi',
+              'Denda',
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF3B6D11),
+                color: Color(0xFF92400E),
               ),
             ),
           ),

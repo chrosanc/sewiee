@@ -83,24 +83,6 @@ class OrderViewmodel extends ChangeNotifier {
   // ORDER FUNCTION
   // =========================
 
-  // Future<void> getOrdersByRenterId() async {
-  //   _showLoadingDialog();
-  //   try{
-  //     orders = await _orderRepository.getOrderByRenterId(userModel!.uid);
-  //     unpaidOrders = orders.where((e) => e!.status == OrderStatus.waitingPayment ).toList();
-  //     processedOrders = orders.where((e) => e!.status != OrderStatus.waitingPayment).toList();
-  //     notifyListeners();
-  //   } catch(e) {
-  //     debugPrint(e.toString());
-  //   } finally{
-  //     _hideLoadingDialog();
-  //   }
-  // }
-
-  Stream<List<OrderModel>> streamOrderByRenterId() {
-    return _orderRepository.streamOrderByRenterId(userModel!.uid);
-  }
-
   Stream<List<OrderModel>> streamOrderByOwnerId() {
     return _orderRepository.streamOrderByOwnerId(userModel!.uid);
   }
@@ -198,10 +180,31 @@ class OrderViewmodel extends ChangeNotifier {
       debugLabel: 'UPDATE RENT DATE ERROR',
     );
   }
+  // ===========================================================================
+  // USER ORDER DETAIL FUNCTION
+  // ===========================================================================
+  //
+  // Future<void> getOrdersByRenterId() async {
+  //   _showLoadingDialog();
+  //   try{
+  //     orders = await _orderRepository.getOrderByRenterId(userModel!.uid);
+  //     unpaidOrders = orders.where((e) => e!.status == OrderStatus.waitingPayment ).toList();
+  //     processedOrders = orders.where((e) => e!.status != OrderStatus.waitingPayment).toList();
+  //     notifyListeners();
+  //   } catch(e) {
+  //     debugPrint(e.toString());
+  //   } finally{
+  //     _hideLoadingDialog();
+  //   }
+  // }
 
-  // =========================
-  // STATUS FUNCTION
-  // =========================
+  Stream<List<OrderModel>> streamOrderByRenterId() {
+    return _orderRepository.streamOrderByRenterId(userModel!.uid);
+  }
+
+  // ===========================================================================
+  // MERCHANT ORDER DETAIL FUNCTION
+  // ===========================================================================
 
   Future<void> updateOrderStatus({
     required String orderId,
@@ -282,44 +285,26 @@ class OrderViewmodel extends ChangeNotifier {
     }, debugLabel: 'MARK ORDER PROCESSED ERROR');
   }
 
-  Future<OrderModel> markOrderInspection({
-    required OrderModel order,
-    required DeliveryMethod deliveryMethod,
-    String? receiptNumber,
-  }) {
+  Future<OrderModel> markOrderInspection(
+    OrderModel order,
+    int? brokenFineAmount,
+  ) {
     return _runOrderMutation(() async {
-      if (deliveryMethod == DeliveryMethod.expedition) {
-        final trimmedReceipt = receiptNumber?.trim();
-        if (trimmedReceipt == null || trimmedReceipt.isEmpty) {
-          throw Exception('Nomor resi tidak boleh kosong');
-        }
+      OrderStatus status = (brokenFineAmount != null && brokenFineAmount > 0)
+          ? OrderStatus.damageClaim
+          : OrderStatus.completed;
 
-        await _orderRepository.updateDeliveryReceiptNumber(
-          orderId: order.id,
-          receiptNumber: trimmedReceipt,
-        );
-
-        final tracking =
-        (order.shipping.deliveryTracking ?? const DeliveryTracking())
-            .copyWith(
-          receiptNumber: trimmedReceipt,
-          status: 'on_delivery',
-          shippedAt: DateTime.now(),
-        );
-
-        return order.copyWith(
-          status: OrderStatus.onDelivery,
-          shipping: order.shipping.copyWith(deliveryTracking: tracking),
-        );
-      }
-
-      await _orderRepository.updateOrderStatus(
+      await _orderRepository.updateInspection(
         orderId: order.id,
-        newStatus: OrderStatus.waitingPickup,
+        fine: brokenFineAmount ?? 0,
+        status: status.value,
       );
 
-      return order.copyWith(status: OrderStatus.waitingPickup);
-    }, debugLabel: 'MARK ORDER PROCESSED ERROR');
+      return order.copyWith(
+        rental: order.rental.copyWith(brokenFine: brokenFineAmount ?? 0),
+        status: status,
+      );
+    }, debugLabel: 'ONINSPECTION ERROR');
   }
 
   Future<OrderModel> markOrderOnRent(OrderModel order) {

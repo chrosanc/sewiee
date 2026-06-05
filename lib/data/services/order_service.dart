@@ -88,11 +88,12 @@ class OrderService {
 
   Future<void> updateInspection({
     required String orderId,
+    required String status,
     required int brokenFine,
   }) {
     return _firestore.collection('order').doc(orderId).update({
       'rental.broken_fine': brokenFine,
-      'status': OrderStatus.onDelivery.value,
+      'status': status,
       'updated_at': FieldValue.serverTimestamp(),
     });
   }

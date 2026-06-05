@@ -200,7 +200,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => OrderDetailScreen(),
+                                    builder: (_) => OrderDetailScreen(orderData: item,),
                                   ),
                                 );
                               },

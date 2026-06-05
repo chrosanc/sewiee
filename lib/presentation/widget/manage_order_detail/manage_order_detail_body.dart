@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:sewiee/app/screen_theme/order_detail_theme.dart';
 import 'package:sewiee/app/utils/currency_utils.dart';
+import 'package:sewiee/app/utils/date_format.dart';
 import 'package:sewiee/app/utils/helpers/order_utils.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/domain/enum/delivery_method_enum.dart';
 import 'package:sewiee/domain/enum/order_status.dart';
 import 'package:sewiee/domain/enum/return_method_enum.dart';
 import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_primitives.dart';
-import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_timeline.dart';
 import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_tracking.dart';
 
 class ManageOrderDetailBody extends StatelessWidget {
@@ -24,7 +24,7 @@ class ManageOrderDetailBody extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
       child: Column(
         children: [
-          _StatusBannerCard(status: order.status),
+          _StatusBannerCard(status: order.status, model: order,),
           const SizedBox(height: 10),
           _RenterCard(order: order),
           const SizedBox(height: 10),
@@ -64,12 +64,13 @@ class ManageOrderDetailBody extends StatelessWidget {
 
 class _StatusBannerCard extends StatelessWidget {
   final OrderStatus status;
+  final OrderModel? model;
 
-  const _StatusBannerCard({required this.status});
+  const _StatusBannerCard({required this.status, this.model});
 
   @override
   Widget build(BuildContext context) {
-    final cfg = OrderStatusConfig.banner(status);
+    final cfg = OrderStatusConfig.banner(status, model);
 
     return Container(
       width: double.infinity,

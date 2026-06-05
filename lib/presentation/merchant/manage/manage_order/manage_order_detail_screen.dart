@@ -8,7 +8,9 @@ import 'package:sewiee/domain/enum/order_status.dart';
 import 'package:sewiee/presentation/order/order_viewmodel.dart';
 import 'package:sewiee/presentation/widget/manage_order_detail/manage_order_detail_bars.dart';
 import 'package:sewiee/presentation/widget/manage_order_detail/manage_order_detail_body.dart';
+import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_inspection_sheet.dart';
 import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_receipt_sheet.dart';
+
 class ManageOrderDetailScreen extends StatefulWidget {
   final OrderModel order;
 
@@ -24,6 +26,7 @@ class _ManageOrderDetailScreenState extends State<ManageOrderDetailScreen> {
   bool _isSubmitting = false;
 
   final TextEditingController receiptNumberController = TextEditingController();
+  final TextEditingController brokenFineAmount = TextEditingController();
 
   @override
   void initState() {
@@ -72,7 +75,11 @@ class _ManageOrderDetailScreenState extends State<ManageOrderDetailScreen> {
     String? receiptNumber;
 
     if (_deliveryMethod == DeliveryMethod.expedition) {
-      receiptNumber = await showReceiptNumberSheet(context, order: _order, controller: receiptNumberController);
+      receiptNumber = await showReceiptNumberSheet(
+        context,
+        order: _order,
+        controller: receiptNumberController,
+      );
       if (receiptNumber == null || receiptNumber.isEmpty) return;
     }
 
@@ -85,18 +92,17 @@ class _ManageOrderDetailScreenState extends State<ManageOrderDetailScreen> {
     );
   }
 
-  // Future<void> _onInspection() async {
-  //   int? fine;
-  //
-  //   await _performOrderAction(
-  //         (vm) => vm.markOrderInspection(
-  //       order: _order,
-  //       deliveryMethod: _deliveryMethod,
-  //       receiptNumber: receiptNumber,
-  //     ),
-  //   );
-  // }
+  Future<void> _onInspection() async {
+    final int? fineAmount = await showInspectionBrokenFineSheet(
+      context,
+      controller: brokenFineAmount,
+      order: _order,
+    );
 
+    if (fineAmount == null) return;
+
+    await _performOrderAction((vm) => vm.markOrderInspection(_order, fineAmount));
+  }
   Future<void> _onStartRent() {
     return _performOrderAction((vm) => vm.markOrderOnRent(_order));
   }
@@ -121,7 +127,7 @@ class _ManageOrderDetailScreenState extends State<ManageOrderDetailScreen> {
         onItemOnRent: _onStartRent,
         onConfirmReturn: () => _changeStatus(OrderStatus.returned),
         onMarkReturned: () => _changeStatus(OrderStatus.returned),
-        onInspection: () => _changeStatus(OrderStatus.onInspection),
+        onInspection: () => _onInspection(),
         onComplete: () => _changeStatus(OrderStatus.completed),
       ),
     );

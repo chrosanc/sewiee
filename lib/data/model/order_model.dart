@@ -230,10 +230,18 @@ class UserSnapshot {
   final String name;
   final String username;
 
+  // Field khusus untuk owner (store)
+  final String? storeName;
+  final String? storeUsername;
+  final String? phoneNumber;
+
   const UserSnapshot({
     required this.id,
     required this.name,
     required this.username,
+    this.storeName,
+    this.storeUsername,
+    this.phoneNumber,
   });
 
   factory UserSnapshot.fromJson(Map<String, dynamic> json) {
@@ -241,11 +249,21 @@ class UserSnapshot {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       username: json['username'] ?? '',
+      storeName: json['store_name'] ?? null,
+      storeUsername: json['store_username'] ?? null,
+      phoneNumber: json['phone_number'] ?? null,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {"id": id, "name": name, "username": username};
+    return {
+      "id": id,
+      "name": name,
+      "username": username,
+      if (storeName != null) "store_name": storeName,
+      if (storeUsername != null) "store_username": storeUsername,
+      if (phoneNumber != null) "phone_number": phoneNumber,
+    };
   }
 }
 
@@ -381,6 +399,7 @@ class RentalDetail {
     int? lateFee,
     bool? isLate,
     int? totalDuration,
+    int? brokenFine,
   }) {
     return RentalDetail(
       startDate: startDate ?? this.startDate,
@@ -388,6 +407,7 @@ class RentalDetail {
       lateFee: lateFee ?? this.lateFee,
       isLate: isLate ?? this.isLate,
       totalDuration: totalDuration ?? this.totalDuration,
+      brokenFine: brokenFine ?? this.brokenFine,
     );
   }
 }

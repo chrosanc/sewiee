@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/domain/enum/order_status.dart';
 
 // ─── Badge Config ──────────────────────────────────────────────────────────
@@ -134,11 +135,10 @@ abstract final class OrderStatusConfig {
           text: Color(0xFF993C1D),
           label: 'Terlambat',
         );
-
     }
   }
 
-  static BannerConfig banner(OrderStatus s) {
+  static BannerConfig banner(OrderStatus s, OrderModel? orderData) {
     switch (s) {
       case OrderStatus.waitingPayment:
         return const BannerConfig(
@@ -147,8 +147,8 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFFEF9F27),
           titleColor: Color(0xFF854F0B),
           subtitleColor: Color(0xFFBA7517),
-          title: 'Pembayaran menunggu approve Merchant',
-          subtitle: 'Pesanan akan otomatis dibatalkan jika lewat batas waktu',
+          title: 'Menunggu pembayaran',
+          subtitle: 'Verifikasi pembayaran pelanggan sebelum memproses pesanan',
         );
       case OrderStatus.waitingConfirmation:
       case OrderStatus.processing:
@@ -158,8 +158,8 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFF378ADD),
           titleColor: Color(0xFF185FA5),
           subtitleColor: Color(0xFF378ADD),
-          title: 'Pesanan menunggu konfirmasi',
-          subtitle: 'Konfirmasikan jika barang sudah dikirim ke pelanggan',
+          title: 'Pesanan masuk',
+          subtitle: 'Siapkan barang dan verifikasi detail pesanan',
         );
       case OrderStatus.waitingPickup:
         return const BannerConfig(
@@ -168,8 +168,8 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFF378ADD),
           titleColor: Color(0xFF185FA5),
           subtitleColor: Color(0xFF378ADD),
-          title: 'Barang menunggu untuk di-pickup',
-          subtitle: 'Pastikan barang sudah siap dikirim ke pelanggan',
+          title: 'Menunggu pengambilan',
+          subtitle: 'Pastikan barang sudah siap dan sesuai pesanan',
         );
       case OrderStatus.onDelivery:
         return const BannerConfig(
@@ -178,8 +178,8 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFF378ADD),
           titleColor: Color(0xFF185FA5),
           subtitleColor: Color(0xFF378ADD),
-          title: 'Pesanan sedang dalam pengiriman',
-          subtitle: 'Tandai setelah barang diterima oleh pelanggan',
+          title: 'Pesanan dalam pengiriman',
+          subtitle: 'Pantau status pengiriman hingga pelanggan menerima barang',
         );
       case OrderStatus.delivered:
         return const BannerConfig(
@@ -188,8 +188,8 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFF7F77DD),
           titleColor: Color(0xFF534AB7),
           subtitleColor: Color(0xFF7F77DD),
-          title: 'Barang telah sampai tujuan',
-          subtitle: 'Silahkan konfirmasi terlebih dahulu untuk lanjut ke pengecekan',
+          title: 'Pesanan diterima pelanggan',
+          subtitle: 'Konfirmasi penerimaan untuk melanjutkan proses selanjutnya',
         );
       case OrderStatus.onInspection:
         return const BannerConfig(
@@ -198,18 +198,29 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFFD85A30),
           titleColor: Color(0xFF993C1D),
           subtitleColor: Color(0xFFD85A30),
-          title: 'Pesanan sedang diinspeksi',
-          subtitle: 'Harap tunggu untuk konfirmasi keberlanjutan',
+          title: 'Pengecekan barang',
+          subtitle: 'Periksa kondisi barang sebelum memberikan persetujuan',
         );
-      case OrderStatus.onRent:
+      case OrderStatus.damageClaim:
         return const BannerConfig(
+          bg: Color(0xFFFCEBEB),
+          border: Color(0xFFF7C1C1),
+          dot: Color(0xFFE24B4A),
+          titleColor: Color(0xFFA32D2D),
+          subtitleColor: Color(0xFFE24B4A),
+          title: 'Kerusakan barang',
+          subtitle: 'Permintaan biaya kerusakan barang dikirim.',
+        );
+
+      case OrderStatus.onRent:
+        return BannerConfig(
           bg: Color(0xFFEEEDFE),
           border: Color(0xFFCECBF6),
           dot: Color(0xFF7F77DD),
           titleColor: Color(0xFF534AB7),
           subtitleColor: Color(0xFF7F77DD),
-          title: 'Barang sedang dipinjam',
-          subtitle: 'Konfirmasi kembali ketika barang dikembalikan',
+          title: 'Sedang dipinjam pelanggan',
+          subtitle: 'Tanggal sewa: ${orderData?.rental.startDate ?? '-'}',
         );
       case OrderStatus.lateReturn:
         return const BannerConfig(
@@ -219,7 +230,7 @@ abstract final class OrderStatusConfig {
           titleColor: Color(0xFF993C1D),
           subtitleColor: Color(0xFFD85A30),
           title: 'Pengembalian terlambat',
-          subtitle: 'Hubungi pelanggan untuk percepatan pengembalian',
+          subtitle: 'Hubungi pelanggan untuk percepatan pengembalian barang',
         );
       case OrderStatus.returnPending:
         return const BannerConfig(
@@ -228,8 +239,8 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFF378ADD),
           titleColor: Color(0xFF185FA5),
           subtitleColor: Color(0xFF378ADD),
-          title: 'Pengembalian barang menunggu',
-          subtitle: 'Pastikan barang sudah dikembalikan oleh pelanggan',
+          title: 'Menunggu pengembalian',
+          subtitle: 'Pastikan barang dikembalikan sesuai kondisi pesanan',
         );
       case OrderStatus.returnOnDelivery:
         return const BannerConfig(
@@ -238,8 +249,8 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFF378ADD),
           titleColor: Color(0xFF185FA5),
           subtitleColor: Color(0xFF378ADD),
-          title: 'Pengembalian barang sedang dikirim',
-          subtitle: 'Tandai setelah barang diterima di toko',
+          title: 'Pengembalian dalam perjalanan',
+          subtitle: 'Pantau status pengembalian hingga barang tiba di toko',
         );
       case OrderStatus.returned:
         return const BannerConfig(
@@ -249,7 +260,7 @@ abstract final class OrderStatusConfig {
           titleColor: Color(0xFF3B6D11),
           subtitleColor: Color(0xFF639922),
           title: 'Barang dikembalikan',
-          subtitle: 'Transaksi selesai dan dana bisa dicairkan',
+          subtitle: 'Transaksi selesai.',
         );
       case OrderStatus.completed:
         return const BannerConfig(
@@ -259,7 +270,7 @@ abstract final class OrderStatusConfig {
           titleColor: Color(0xFF3B6D11),
           subtitleColor: Color(0xFF639922),
           title: 'Pesanan selesai',
-          subtitle: 'Transaksi berhasil dilakukan',
+          subtitle: 'Transaksi berhasil dan ditutup.',
         );
       case OrderStatus.cancelled:
         return const BannerConfig(
@@ -268,8 +279,8 @@ abstract final class OrderStatusConfig {
           dot: Color(0xFFE24B4A),
           titleColor: Color(0xFFA32D2D),
           subtitleColor: Color(0xFFE24B4A),
-          title: 'Pesanan dihapus',
-          subtitle: 'Pesanan ini sudah tidak aktif',
+          title: 'Pesanan dibatalkan',
+          subtitle: 'Pesanan tidak dilanjutkan.',
         );
       default:
         return const BannerConfig(
@@ -279,11 +290,12 @@ abstract final class OrderStatusConfig {
           titleColor: Color(0xFF185FA5),
           subtitleColor: Color(0xFF378ADD),
           title: 'Status pesanan',
-          subtitle: '',
+          subtitle: 'Periksa detail pesanan untuk tindakan lebih lanjut',
         );
     }
   }
 }
+
 
 class OrderUtils {
   static String initials(String name) {
@@ -356,12 +368,252 @@ class OrderUtils {
         return 'Barang ditandai sudah dikembalikan';
       case OrderStatus.onInspection:
         return 'Barang masuk pengecekan';
+      case OrderStatus.damageClaim:
+        return 'Barang keadaan rusak';
       case OrderStatus.completed:
         return 'Pesanan diselesaikan';
       case OrderStatus.cancelled:
         return 'Pesanan ditolak';
       default:
         return 'Status diperbarui';
+    }
+  }
+}
+
+class RenterBannerConfig {
+  final Color bg, border, dot, titleColor, subtitleColor;
+  final String title, subtitle;
+
+  const RenterBannerConfig({
+    required this.bg,
+    required this.border,
+    required this.dot,
+    required this.titleColor,
+    required this.subtitleColor,
+    required this.title,
+    required this.subtitle,
+  });
+
+  static RenterBannerConfig banner(OrderStatus s, OrderModel? orderData) {
+    switch (s) {
+
+    /// =========================
+    /// WAITING PAYMENT
+    /// =========================
+      case OrderStatus.waitingPayment:
+        return const RenterBannerConfig(
+          bg: Color(0xFFFAEEDA),
+          border: Color(0xFFFAC775),
+          dot: Color(0xFFEF9F27),
+          titleColor: Color(0xFF854F0B),
+          subtitleColor: Color(0xFFBA7517),
+          title: 'Selesaikan pembayaran',
+          subtitle: 'Pesanan kamu belum aktif sampai pembayaran berhasil',
+        );
+
+    /// =========================
+    /// PAYMENT FAILED / EXPIRED
+    /// =========================
+      case OrderStatus.paymentFailed:
+      case OrderStatus.paymentExpired:
+        return const RenterBannerConfig(
+          bg: Color(0xFFFCEBEB),
+          border: Color(0xFFF7C1C1),
+          dot: Color(0xFFE24B4A),
+          titleColor: Color(0xFFA32D2D),
+          subtitleColor: Color(0xFFE24B4A),
+          title: 'Pembayaran gagal',
+          subtitle: 'Silakan lakukan pembayaran ulang untuk melanjutkan',
+        );
+
+    /// =========================
+    /// PAID
+    /// =========================
+      case OrderStatus.paid:
+        return const RenterBannerConfig(
+          bg: Color(0xFFEAF3DE),
+          border: Color(0xFFC0DD97),
+          dot: Color(0xFF639922),
+          titleColor: Color(0xFF3B6D11),
+          subtitleColor: Color(0xFF639922),
+          title: 'Pembayaran berhasil',
+          subtitle: 'Pesanan kamu sedang diproses oleh toko',
+        );
+
+    /// =========================
+    /// PROCESSING
+    /// =========================
+      case OrderStatus.waitingConfirmation:
+      case OrderStatus.processing:
+        return const RenterBannerConfig(
+          bg: Color(0xFFE6F1FB),
+          border: Color(0xFFB5D4F4),
+          dot: Color(0xFF378ADD),
+          titleColor: Color(0xFF185FA5),
+          subtitleColor: Color(0xFF378ADD),
+          title: 'Pesanan diproses',
+          subtitle: 'Penjual sedang menyiapkan barang kamu',
+        );
+
+    /// =========================
+    /// WAITING PICKUP
+    /// =========================
+      case OrderStatus.waitingPickup:
+        return const RenterBannerConfig(
+          bg: Color(0xFFE6F1FB),
+          border: Color(0xFFB5D4F4),
+          dot: Color(0xFF378ADD),
+          titleColor: Color(0xFF185FA5),
+          subtitleColor: Color(0xFF378ADD),
+          title: 'Barang siap diambil',
+          subtitle: 'Silakan ambil sesuai jadwal yang dipilih',
+        );
+
+    /// =========================
+    /// ON DELIVERY
+    /// =========================
+      case OrderStatus.onDelivery:
+        return const RenterBannerConfig(
+          bg: Color(0xFFE6F1FB),
+          border: Color(0xFFB5D4F4),
+          dot: Color(0xFF378ADD),
+          titleColor: Color(0xFF185FA5),
+          subtitleColor: Color(0xFF378ADD),
+          title: 'Dalam perjalanan',
+          subtitle: 'Pesanan sedang menuju lokasi kamu',
+        );
+
+    /// =========================
+    /// DELIVERED
+    /// =========================
+      case OrderStatus.delivered:
+        return const RenterBannerConfig(
+          bg: Color(0xFFEEEDFE),
+          border: Color(0xFFCECBF6),
+          dot: Color(0xFF7F77DD),
+          titleColor: Color(0xFF534AB7),
+          subtitleColor: Color(0xFF7F77DD),
+          title: 'Barang sudah diterima',
+          subtitle: 'Kamu bisa mulai menggunakan barang sewaan',
+        );
+
+    /// =========================
+    /// ON RENT
+    /// =========================
+      case OrderStatus.onRent:
+        return RenterBannerConfig(
+          bg: const Color(0xFFEEEDFE),
+          border: const Color(0xFFCECBF6),
+          dot: const Color(0xFF7F77DD),
+          titleColor: const Color(0xFF534AB7),
+          subtitleColor: const Color(0xFF7F77DD),
+          title: 'Sedang disewa',
+          subtitle:
+          'Periode sewa aktif • ${orderData?.rental.startDate ?? '-'}',
+        );
+
+    /// =========================
+    /// RETURN FLOW
+    /// =========================
+      case OrderStatus.returnPending:
+        return const RenterBannerConfig(
+          bg: Color(0xFFE6F1FB),
+          border: Color(0xFFB5D4F4),
+          dot: Color(0xFF378ADD),
+          titleColor: Color(0xFF185FA5),
+          subtitleColor: Color(0xFF378ADD),
+          title: 'Menunggu pengembalian',
+          subtitle: 'Persiapkan barang untuk dikembalikan',
+        );
+
+      case OrderStatus.returnOnDelivery:
+        return const RenterBannerConfig(
+          bg: Color(0xFFE6F1FB),
+          border: Color(0xFFB5D4F4),
+          dot: Color(0xFF378ADD),
+          titleColor: Color(0xFF185FA5),
+          subtitleColor: Color(0xFF378ADD),
+          title: 'Pengembalian dalam proses',
+          subtitle: 'Barang sedang dikirim kembali ke toko',
+        );
+
+      case OrderStatus.returned:
+        return const RenterBannerConfig(
+          bg: Color(0xFFEAF3DE),
+          border: Color(0xFFC0DD97),
+          dot: Color(0xFF639922),
+          titleColor: Color(0xFF3B6D11),
+          subtitleColor: Color(0xFF639922),
+          title: 'Barang sudah dikembalikan',
+          subtitle: 'Terima kasih sudah mengembalikan tepat waktu',
+        );
+
+    /// =========================
+    /// INSPECTION / DAMAGE
+    /// =========================
+      case OrderStatus.onInspection:
+        return const RenterBannerConfig(
+          bg: Color(0xFFFAECE7),
+          border: Color(0xFFF5C4B3),
+          dot: Color(0xFFD85A30),
+          titleColor: Color(0xFF993C1D),
+          subtitleColor: Color(0xFFD85A30),
+          title: 'Proses pengecekan',
+          subtitle: 'Barang sedang diperiksa oleh toko',
+        );
+
+      case OrderStatus.damageClaim:
+        return const RenterBannerConfig(
+          bg: Color(0xFFFCEBEB),
+          border: Color(0xFFF7C1C1),
+          dot: Color(0xFFE24B4A),
+          titleColor: Color(0xFFA32D2D),
+          subtitleColor: Color(0xFFE24B4A),
+          title: 'Klaim kerusakan',
+          subtitle: 'Ada laporan kerusakan pada barang sewaan',
+        );
+
+    /// =========================
+    /// COMPLETED
+    /// =========================
+      case OrderStatus.completed:
+        return const RenterBannerConfig(
+          bg: Color(0xFFEAF3DE),
+          border: Color(0xFFC0DD97),
+          dot: Color(0xFF639922),
+          titleColor: Color(0xFF3B6D11),
+          subtitleColor: Color(0xFF639922),
+          title: 'Selesai',
+          subtitle: 'Transaksi kamu telah selesai',
+        );
+
+    /// =========================
+    /// CANCELLED
+    /// =========================
+      case OrderStatus.cancelled:
+        return const RenterBannerConfig(
+          bg: Color(0xFFFCEBEB),
+          border: Color(0xFFF7C1C1),
+          dot: Color(0xFFE24B4A),
+          titleColor: Color(0xFFA32D2D),
+          subtitleColor: Color(0xFFE24B4A),
+          title: 'Pesanan dibatalkan',
+          subtitle: 'Pesanan tidak dapat dilanjutkan',
+        );
+
+    /// =========================
+    /// DEFAULT
+    /// =========================
+      default:
+        return const RenterBannerConfig(
+          bg: Color(0xFFE6F1FB),
+          border: Color(0xFFB5D4F4),
+          dot: Color(0xFF378ADD),
+          titleColor: Color(0xFF185FA5),
+          subtitleColor: Color(0xFF378ADD),
+          title: 'Status pesanan',
+          subtitle: 'Silakan cek detail pesanan kamu',
+        );
     }
   }
 }
