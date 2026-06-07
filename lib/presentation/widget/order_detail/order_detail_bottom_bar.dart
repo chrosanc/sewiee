@@ -9,10 +9,15 @@ class RenterOrderBottomBar extends StatelessWidget {
 
   final VoidCallback onPay;
   final VoidCallback onCancel;
-  final VoidCallback onTrack;
-  final VoidCallback onConfirmPickup;
+
+  final VoidCallback onConfirmArrived;
   final VoidCallback onStartRent;
-  final VoidCallback onConfirmReturn;
+
+  final VoidCallback onSubmitReturn;
+  final VoidCallback onTrackReturn;
+
+  final VoidCallback onPayPenalty;
+
   final VoidCallback onHelp;
 
   const RenterOrderBottomBar({
@@ -22,128 +27,155 @@ class RenterOrderBottomBar extends StatelessWidget {
     required this.isLoading,
     required this.onPay,
     required this.onCancel,
-    required this.onTrack,
-    required this.onConfirmPickup,
+    required this.onConfirmArrived,
     required this.onStartRent,
-    required this.onConfirmReturn,
+    required this.onSubmitReturn,
+    required this.onTrackReturn,
+    required this.onPayPenalty,
     required this.onHelp,
   });
 
+  static const _primary = Color(0xFFE8572A);
+
   @override
   Widget build(BuildContext context) {
-    final actions = _actionsForStatus();
-    if (actions == null) return const SizedBox.shrink();
+    final child = _buildActions();
+
+    if (child == null) {
+      return const SizedBox.shrink();
+    }
 
     return Container(
-      color: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : actions,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: Colors.grey.shade200,
+          ),
         ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: isLoading
+            ? const SizedBox(
+          height: 52,
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        )
+            : child,
       ),
     );
   }
 
-  Widget? _actionsForStatus() {
+  Widget? _buildActions() {
     switch (status) {
 
-    /// =======================
-    /// WAITING PAYMENT
-    /// =======================
+    // =========================
+    // WAITING PAYMENT
+    // =========================
       case OrderStatus.waitingPayment:
         return Row(
           children: [
+
             Expanded(
               child: OutlinedButton(
                 onPressed: onCancel,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
                 child: const Text('Batalkan'),
               ),
             ),
-            const SizedBox(width: 10),
+
+            const SizedBox(width: 12),
+
             Expanded(
               flex: 2,
               child: ElevatedButton(
                 onPressed: onPay,
+                style: _primaryStyle(),
                 child: const Text('Bayar Sekarang'),
               ),
             ),
           ],
         );
 
-    /// =======================
-    /// PROCESSING (seller proses)
-    /// =======================
-      case OrderStatus.processing:
-        return ElevatedButton(
-          onPressed: onTrack,
-          child: const Text('Lacak Pesanan'),
+    // =========================
+    // DELIVERY
+    // =========================
+      case OrderStatus.onDelivery:
+        return ElevatedButton.icon(
+          onPressed: onConfirmArrived,
+          icon: const Icon(Icons.inventory_2_outlined),
+          label: const Text('Barang Sudah Sampai'),
+          style: _primaryStyle(),
         );
 
-    /// =======================
-    /// READY / WAIT PICKUP
-    /// =======================
-      case OrderStatus.waitingPickup:
-        return ElevatedButton(
-          onPressed: onConfirmPickup,
-          child: Text(
-            deliveryMethod == DeliveryMethod.renterPickup
-                ? 'Saya Sudah Ambil Barang'
-                : 'Konfirmasi Barang Diterima',
-          ),
-        );
-
-    /// =======================
-    /// DELIVERED → START RENT
-    /// =======================
+    // =========================
+    // DELIVERED
+    // =========================
       case OrderStatus.delivered:
-        return ElevatedButton(
+        return ElevatedButton.icon(
           onPressed: onStartRent,
-          child: const Text('Mulai Sewa'),
+          icon: const Icon(Icons.play_circle_outline),
+          label: const Text('Mulai Sewa'),
+          style: _primaryStyle(),
         );
 
-    /// =======================
-    /// ON RENT
-    /// =======================
+    // =========================
+    // ON RENT
+    // =========================
       case OrderStatus.onRent:
-        return ElevatedButton(
-          onPressed: onTrack,
-          child: const Text('Lihat Status Sewa'),
+        return ElevatedButton.icon(
+          onPressed: onSubmitReturn,
+          icon: const Icon(Icons.assignment_return_outlined),
+          label: Text(
+            deliveryMethod == DeliveryMethod.expedition
+                ? 'Kirim Pengembalian'
+                : 'Konfirmasi Pengembalian',
+          ),
+          style: _primaryStyle(),
         );
 
-    /// =======================
-    /// RETURN PROCESS
-    /// =======================
+    // =========================
+    // RETURN DELIVERY
+    // =========================
       case OrderStatus.returnOnDelivery:
-        return ElevatedButton(
-          onPressed: onConfirmReturn,
-          child: const Text('Konfirmasi Pengembalian'),
+        return ElevatedButton.icon(
+          onPressed: onTrackReturn,
+          icon: const Icon(Icons.local_shipping_outlined),
+          label: const Text('Lacak Pengembalian'),
+          style: _primaryStyle(),
         );
 
-    /// =======================
-    /// RETURNED / DONE
-    /// =======================
-      case OrderStatus.returned:
-        return ElevatedButton(
-          onPressed: onHelp,
-          child: const Text('Bantuan / Komplain'),
-        );
-
-    /// =======================
-    /// LATE / DAMAGE
-    /// =======================
-      case OrderStatus.lateReturn:
+    // =========================
+    // DAMAGE / LATE
+    // =========================
       case OrderStatus.damageClaim:
-        return ElevatedButton(
-          onPressed: onHelp,
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-          child: const Text('Hubungi CS'),
+      case OrderStatus.lateReturn:
+        return ElevatedButton.icon(
+          onPressed: onPayPenalty,
+          icon: const Icon(Icons.payments_outlined),
+          label: const Text('Bayar Denda'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(52),
+          ),
         );
 
       default:
         return null;
     }
+  }
+
+  ButtonStyle _primaryStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: _primary,
+      foregroundColor: Colors.white,
+      minimumSize: const Size.fromHeight(52),
+    );
   }
 }

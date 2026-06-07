@@ -38,7 +38,7 @@ export const
                         "settlement"
                     ) {
                         orderStatus =
-                            "processing";
+                            "waiting_confirmation";
                     } else if (
                         transactionStatus ==
                         "expire"

@@ -252,6 +252,12 @@ class CheckoutViewmodel extends ChangeNotifier {
   // =========================
   // PAYMENT FUNCTION
   // =========================
+
+  Stream<OrderModel> streamOrder(){
+    return _orderRepository.streamOrder(orderModel!.id);
+  }
+
+
   Future<void> getPaymentMethods() async {
     _showLoadingDialog();
     try {
@@ -370,8 +376,8 @@ class CheckoutViewmodel extends ChangeNotifier {
 
         ownerSnapshot: UserSnapshot(
           id: productModel!.ownerId,
-          name: productModel!.storeName ?? '',
-          username: productModel!.storeUsername ?? '',
+          name: productModel!.storeName,
+          username: productModel!.storeUsername,
           storeName: productModel!.storeName,
           storeUsername: productModel!.storeUsername,
           phoneNumber: productModel!.phoneNumber,

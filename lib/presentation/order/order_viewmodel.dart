@@ -83,6 +83,65 @@ class OrderViewmodel extends ChangeNotifier {
   // ORDER FUNCTION
   // =========================
 
+  Future<void> updateRenterOrderStatus({
+    required String orderId,
+    required OrderStatus status,
+  }) async {
+
+
+    _showLoadingDialog();
+    try {
+
+      selectedOrderModel = await _orderRepository.updateOrderStatus(
+        orderId: orderId,
+        newStatus: status,
+      );
+      notifyListeners();
+
+    } finally {
+      _hideLoadingDialog();
+    }
+  }
+
+  Future<void> submitReturnReceipt({
+    required String orderId,
+    required String receiptNumber,
+  }) async {
+      _showLoadingDialog();
+    try {
+
+
+      await _orderRepository.submitReturnReceipt(
+        orderId: orderId,
+        receiptNumber: receiptNumber,
+      );
+
+    }catch(e) {
+      debugPrint(e.toString());
+    }finally {
+
+      _hideLoadingDialog();
+    }
+  }
+
+  Future<void> payPenalty({
+    required String orderId,
+  }) async {
+    _showLoadingDialog();
+    try {
+
+      await _orderRepository.payPenalty(
+        orderId: orderId,
+      );
+
+    } catch(e){
+      debugPrint(e.toString());
+    } finally {
+
+      _hideLoadingDialog();
+    }
+  }
+
   Stream<List<OrderModel>> streamOrderByOwnerId() {
     return _orderRepository.streamOrderByOwnerId(userModel!.uid);
   }
@@ -200,6 +259,10 @@ class OrderViewmodel extends ChangeNotifier {
 
   Stream<List<OrderModel>> streamOrderByRenterId() {
     return _orderRepository.streamOrderByRenterId(userModel!.uid);
+  }
+
+  Stream<OrderModel> streamOrder(){
+    return _orderRepository.streamOrder(selectedOrderModel!.id);
   }
 
   // ===========================================================================

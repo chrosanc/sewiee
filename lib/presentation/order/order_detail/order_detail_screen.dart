@@ -8,11 +8,12 @@ import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/domain/enum/delivery_method_enum.dart';
 import 'package:sewiee/domain/enum/order_status.dart';
 import 'package:sewiee/presentation/order/order_viewmodel.dart';
+import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_receipt_sheet.dart';
+import 'package:sewiee/presentation/widget/order_detail/order_detail_bottom_bar.dart';
 
 class OrderDetailScreen extends StatefulWidget {
-  final OrderModel orderData;
 
-  const OrderDetailScreen({super.key, required this.orderData});
+  const OrderDetailScreen({super.key});
 
   @override
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
@@ -69,39 +70,224 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     super.dispose();
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _bg,
-      appBar: _buildAppBar(context),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.only(bottom: 32),
-            child: Column(
-              children: [
-                _StatusBannerCard(status: widget.orderData.status),
-                _buildOrderMeta(),
-                const SizedBox(height: 12),
-                _buildStoreCard(),
-                const SizedBox(height: 12),
-                _buildProductCard(),
-                const SizedBox(height: 12),
-                _buildShippingCard(),
-                const SizedBox(height: 12),
-                _buildReturnCard(),
-                const SizedBox(height: 12),
-                _buildPaymentCard(),
-                const SizedBox(height: 20),
-                _buildActionButton(),
-              ],
+
+    return StreamBuilder<OrderModel>(
+      stream: vm.streamOrder(),
+
+      builder: (context, snapshot) {
+
+        // =========================
+        // LOADING
+        // =========================
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        // =========================
+        // ERROR
+        // =========================
+        if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child: Text(
+                'Terjadi kesalahan: ${snapshot.error}',
+              ),
+            ),
+          );
+        }
+
+        // =========================
+        // EMPTY
+        // =========================
+        if (!snapshot.hasData) {
+          return const Scaffold(
+            body: Center(
+              child: Text(
+                'Pesanan tidak ditemukan',
+              ),
+            ),
+          );
+        }
+
+        final order = snapshot.data!;
+
+        return Scaffold(
+          backgroundColor: _bg,
+
+          appBar: _buildAppBar(context),
+
+          // =========================
+          // BOTTOM BAR
+          // =========================
+          bottomNavigationBar: RenterOrderBottomBar(
+
+            status: order.status,
+
+            deliveryMethod: DeliveryMethodX.fromString(
+              order.shipping.deliveryMethod,
+            ),
+
+            isLoading: vm.isLoading,
+
+            // =========================
+            // BAYAR
+            // =========================
+            onPay: () async {
+
+            },
+
+            // =========================
+            // CANCEL
+            // =========================
+            onCancel: () async {
+
+            },
+
+            // =========================
+            // BARANG SAMPAI
+            // =========================
+            onConfirmArrived: () async {
+
+              await vm.updateRenterOrderStatus(
+                orderId: order.id,
+                status: OrderStatus.delivered,
+              );
+            },
+
+            // =========================
+            // MULAI SEWA
+            // =========================
+            onStartRent: () async {
+
+              await vm.updateRenterOrderStatus(
+                orderId: order.id,
+                status: OrderStatus.onRent,
+              );
+            },
+
+            // =========================
+            // PENGEMBALIAN
+            // =========================
+            onSubmitReturn: () async {
+
+              final isExpedition =
+                  order.shipping.returnMethod ==
+                      'expedition_return';
+
+              // =========================
+              // RETURN VIA EXPEDITION
+              // =========================
+              if (isExpedition) {
+
+                final controller = TextEditingController();
+
+                final receipt = await showReceiptNumberSheet(
+                  context,
+                  controller: controller,
+                  order: order,
+                );
+
+                if (receipt == null) return;
+
+                await vm.submitReturnReceipt(
+                  orderId: order.id,
+                  receiptNumber: receipt,
+                );
+
+                return;
+              }
+
+              // =========================
+              // PICKUP RETURN
+              // =========================
+              await vm.updateRenterOrderStatus(
+                orderId: order.id,
+                status: OrderStatus.returned,
+              );
+            },
+
+            // =========================
+            // TRACK RETURN
+            // =========================
+            onTrackReturn: () {
+
+            },
+
+            // =========================
+            // PAY PENALTY
+            // =========================
+            onPayPenalty: () async {
+
+            },
+
+            // =========================
+            // HELP
+            // =========================
+            onHelp: () {
+
+            },
+          ),
+
+          // =========================
+          // BODY
+          // =========================
+          body: FadeTransition(
+            opacity: _fadeAnimation,
+
+            child: SlideTransition(
+              position: _slideAnimation,
+
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 32),
+
+                child: Column(
+                  children: [
+
+                    _StatusBannerCard(
+                      status: order.status,
+                      model: order,
+                    ),
+
+                    _buildOrderMeta(order),
+
+                    const SizedBox(height: 12),
+
+                    _buildStoreCard(order),
+
+                    const SizedBox(height: 12),
+
+                    _buildProductCard(order),
+
+                    const SizedBox(height: 12),
+
+                    _buildShippingCard(order),
+
+                    const SizedBox(height: 12),
+
+                    _buildReturnCard(order),
+
+                    const SizedBox(height: 12),
+
+                    _buildPaymentCard(order),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -140,7 +326,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   // ── Status Banner ────────────────────────────────────────────────────────────
 
   // ── Order Meta ───────────────────────────────────────────────────────────────
-  Widget _buildOrderMeta() {
+  Widget _buildOrderMeta(OrderModel order) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,20 +335,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           const SizedBox(height: 16),
           _metaRow(
             'Kode Pesanan',
-            widget.orderData.orderNumber,
+            order!.orderNumber,
             copyable: true,
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Tanggal Pembayaran',
-            DateFormat.formatDateTimeWIB(widget.orderData.payment.paidAt!),
+            DateFormat.formatDateTimeWIB(order.payment.paidAt!),
           ),
         ],
       ),
     );
   }
   // ── Store Card ─────────────────────────────────────────────────────────────
-  Widget _buildStoreCard(){
+  Widget _buildStoreCard(OrderModel order){
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,12 +357,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           const SizedBox(height: 16),
           _metaRow(
             'Nama Toko',
-            widget.orderData.renterSnapshot.name,
+            order?.ownerSnapshot.storeName ?? '',
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Nomor Handphone Toko',
-            '',
+            order?.ownerSnapshot.phoneNumber ?? '',
           ),
         ],
       ),
@@ -184,7 +370,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   // ── Product Card ─────────────────────────────────────────────────────────────
-  Widget _buildProductCard() {
+  Widget _buildProductCard(OrderModel order) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +390,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Image.network(
-                    widget.orderData.productSnapshot.image,
+                    order!.productSnapshot.image,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -214,7 +400,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.orderData.productSnapshot.name,
+                        order.productSnapshot.name,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -228,12 +414,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                       Row(
                         children: [
                           Text(
-                            widget.orderData.rental.totalDuration.toString(),
+                            order.rental.totalDuration.toString(),
                             style: TextStyle(fontSize: 11, color: _inkSub),
                           ),
                           Gap(5),
                           Text(
-                            widget.orderData.productSnapshot.durationType,
+                            order.productSnapshot.durationType,
                             style: TextStyle(fontSize: 11, color: _inkSub),
                           ),
                         ],
@@ -242,7 +428,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                       Row(
                         children: [
                           Text(
-                            '${CurrencyUtils().toRupiah(widget.orderData.productSnapshot.price)} / ${widget.orderData.productSnapshot.durationType}',
+                            '${CurrencyUtils().toRupiah(order.productSnapshot.price)} / ${order.productSnapshot.durationType}',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
@@ -269,7 +455,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   // ── Shipping Card ────────────────────────────────────────────────────────────
-  Widget _buildShippingCard() {
+  Widget _buildShippingCard(OrderModel order) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +474,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                   icon: Icons.local_shipping_outlined,
                   label: 'Metode Pengiriman',
                   value: DeliveryMethodX.fromString(
-                    widget.orderData.shipping.deliveryMethod,
+                    order!.shipping.deliveryMethod,
                   ).label,
                 ),
               ),
@@ -296,16 +482,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             ],
           ),
 
-          if (widget.orderData.shipping.deliveryMethod == 'expedition') ...[
+          if (order.shipping.deliveryMethod == 'expedition') ...[
             const SizedBox(height: 12),
             _infoTile(
               icon: Icons.numbers_rounded,
               label: 'Nomor Resi',
               value:
-                  widget.orderData.shipping.deliveryTracking?.receiptNumber ??
-                  '',
+              order.shipping.deliveryTracking?.receiptNumber ??
+                  'Belum dikirim',
               trailing: _chipLabel(
-                widget.orderData.shipping.deliveryTracking?.courierName ?? '',
+                order.shipping.deliveryTracking?.courierName ?? '',
               ),
             ),
           ],
@@ -315,7 +501,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           _infoTile(
             icon: Icons.location_on_outlined,
             label: 'Alamat Pengiriman',
-            value: widget.orderData.address.renter.fullAddress!,
+            value: order.address.renter.fullAddress!,
           ),
         ],
       ),
@@ -323,7 +509,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   // ── Return Card ──────────────────────────────────────────────────────────────
-  Widget _buildReturnCard() {
+  Widget _buildReturnCard(OrderModel order) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +528,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                   icon: Icons.local_shipping_outlined,
                   label: 'Metode Pengembalian',
                   value: DeliveryMethodX.fromString(
-                    widget.orderData.shipping.returnMethod,
+                    order!.shipping.returnMethod,
                   ).label,
                 ),
               ),
@@ -350,17 +536,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             ],
           ),
 
-          if (widget.orderData.shipping.returnMethod ==
-              'expedition_return') ...[
+          if (order.shipping.returnMethod == 'expedition_return') ...[
             const SizedBox(height: 12),
             _infoTile(
               icon: Icons.numbers_rounded,
               label: 'Nomor Resi',
-              value:
-                  widget.orderData.shipping.returnTracking?.receiptNumber ?? '',
-              trailing: _chipLabel(
-                widget.orderData.shipping.returnTracking?.courierName ?? '',
-              ),
+              value: order.shipping.returnTracking?.receiptNumber ??
+                  'Belum melakukan pengembalian',
+              trailing:
+              order.shipping.returnTracking?.courierName != null
+                  ? _chipLabel(
+                order.shipping.returnTracking!.courierName,
+              )
+                  : null,
             ),
           ],
 
@@ -369,7 +557,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           _infoTile(
             icon: Icons.location_on_outlined,
             label: 'Alamat Pengembalian',
-            value: widget.orderData.address.renter.fullAddress!,
+            value: order.address.renter.fullAddress!,
           ),
         ],
       ),
@@ -377,7 +565,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   // ── Payment Card ─────────────────────────────────────────────────────────────
-  Widget _buildPaymentCard() {
+  Widget _buildPaymentCard(OrderModel order) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -386,42 +574,42 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           const SizedBox(height: 16),
           _metaRow(
             'Metode Pembayaran',
-            widget.orderData.payment.paymentMethod.name,
+            order!.payment.paymentMethod.name,
           ),
           const SizedBox(height: 10),
           _metaRow(
-            'Total Harga (${widget.orderData.rental.totalDuration} ${widget.orderData.productSnapshot.durationType})',
+            'Total Harga (${order.rental.totalDuration} ${order.productSnapshot.durationType})',
             CurrencyUtils().toRupiah(
-              widget.orderData.productSnapshot.price *
-                  widget.orderData.rental.totalDuration,
+              order.productSnapshot.price *
+                  order.rental.totalDuration,
             ),
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Deposit Jaminan',
             CurrencyUtils().toRupiah(
-              widget.orderData.payment.amount.depositAmount,
+              order.payment.amount.depositAmount,
             ),
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Ongkos Kirim',
             CurrencyUtils().toRupiah(
-              widget.orderData.payment.amount.deliveryFee,
+              order.payment.amount.deliveryFee,
             ),
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Biaya Layanan',
             CurrencyUtils().toRupiah(
-              widget.orderData.payment.amount.serviceFee,
+              order.payment.amount.serviceFee,
             ),
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Biaya Jasa Aplikasi',
             CurrencyUtils().toRupiah(
-              widget.orderData.payment.amount.applicationFee,
+              order.payment.amount.applicationFee,
             ),
           ),
 
@@ -442,7 +630,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
                 ),
               ),
               Text(
-                CurrencyUtils().toRupiah(widget.orderData.payment.amount.totalPayment),
+                CurrencyUtils().toRupiah(order.payment.amount.totalPayment),
                 style: const TextStyle(
                   fontWeight: FontWeight.w800,
                   fontSize: 16,
@@ -458,35 +646,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   // ── Action Button ────────────────────────────────────────────────────────────
-  Widget _buildActionButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SizedBox(
-        width: double.infinity,
-        height: 52,
-        child: ElevatedButton.icon(
-          onPressed: () {},
-          icon: const Icon(Icons.support_agent_rounded, size: 20),
-          label: const Text(
-            'Hubungi Penjual',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.2,
-            ),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _ink,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   // ── Reusable helpers ─────────────────────────────────────────────────────────
 

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/data/model/payment_model.dart';
@@ -49,11 +50,33 @@ class OrderRepository {
     return _service.streamOrderByOwnerId(ownerId);
   }
 
-  Future<void> updateOrderStatus({
+  Stream<OrderModel> streamOrder(String orderId){
+    return _service.streamOrderStatus(orderId);
+  }
+
+  Future<OrderModel> updateOrderStatus({
     required String orderId,
     required OrderStatus newStatus,
   }) {
     return _service.updateOrderStatus(orderId: orderId, newStatus: newStatus);
+  }
+
+  Future<void> submitReturnReceipt({
+    required String orderId,
+    required String receiptNumber,
+  }) {
+    return _service.submitReturnReceipt(
+      orderId: orderId,
+      receiptNumber: receiptNumber,
+    );
+  }
+
+  Future<void> payPenalty({
+    required String orderId,
+  }) {
+    return _service.payPenalty(
+      orderId: orderId,
+    );
   }
 
   Future<void> updateRentDate({

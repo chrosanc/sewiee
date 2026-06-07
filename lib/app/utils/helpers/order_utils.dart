@@ -452,7 +452,7 @@ class RenterBannerConfig {
           titleColor: Color(0xFF185FA5),
           subtitleColor: Color(0xFF378ADD),
           title: 'Pesanan diproses',
-          subtitle: 'Penjual sedang menyiapkan barang kamu',
+          subtitle: 'Merchant sedang menyiapkan barang kamu',
         );
 
     /// =========================
@@ -466,7 +466,7 @@ class RenterBannerConfig {
           titleColor: Color(0xFF185FA5),
           subtitleColor: Color(0xFF378ADD),
           title: 'Barang siap diambil',
-          subtitle: 'Silakan ambil sesuai jadwal yang dipilih',
+          subtitle: 'Silakan ambil barang sewaan anda',
         );
 
     /// =========================

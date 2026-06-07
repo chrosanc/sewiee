@@ -11,6 +11,62 @@ class OrderService {
     region: 'asia-southeast2',
   );
 
+  Future<OrderModel> updateOrderStatus({
+    required String orderId,
+    required OrderStatus newStatus,
+  }) async {
+
+    final docRef = _firestore.collection('order').doc(orderId);
+
+    await docRef.update({
+      'status': newStatus.value,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    // ambil data terbaru
+    final snapshot = await docRef.get();
+
+    return OrderModel.fromJson(snapshot.data()!);
+  }
+
+  Future<void> submitReturnReceipt({
+    required String orderId,
+    required String receiptNumber,
+  }) async {
+    await _firestore
+        .collection('order')
+        .doc(orderId)
+        .update({
+
+      'status': OrderStatus.returnOnDelivery.value,
+
+      'shipping.returnTracking.receiptNumber':
+      receiptNumber,
+
+      'shipping.returnTracking.createdAt':
+      FieldValue.serverTimestamp(),
+
+      'updatedAt':
+      FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> payPenalty({
+    required String orderId,
+  }) async {
+
+    await _firestore
+        .collection('order')
+        .doc(orderId)
+        .update({
+
+      'penalty.isPaid': true,
+
+      'updatedAt':
+      FieldValue.serverTimestamp(),
+    });
+  }
+
   Future<void> createOrder(OrderModel orderData) async {
     return await _firestore
         .collection('order')
@@ -39,6 +95,22 @@ class OrderService {
         });
   }
 
+  Stream<OrderModel> streamOrderStatus(String orderId) {
+    return FirebaseFirestore.instance
+        .collection('order')
+        .doc(orderId)
+        .snapshots()
+        .map((snapshot) {
+
+      final data = snapshot.data();
+
+      if (data == null) {
+        throw Exception('Order tidak ditemukan');
+      }
+
+      return OrderModel.fromJson(data);
+    });
+  }
   Stream<List<OrderModel>> streamOrderByOwnerId(String ownerId) {
     return FirebaseFirestore.instance
         .collection('order')
@@ -49,16 +121,6 @@ class OrderService {
             return OrderModel.fromJson(doc.data());
           }).toList();
         });
-  }
-
-  Future<void> updateOrderStatus({
-    required String orderId,
-    required OrderStatus newStatus,
-  }) {
-    return _firestore.collection('order').doc(orderId).update({
-      'status': newStatus.value,
-      'updated_at': FieldValue.serverTimestamp(),
-    });
   }
 
   Future<void> updateRentDate({

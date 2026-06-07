@@ -10,7 +10,7 @@ extension DeliveryMethodX on DeliveryMethod {
       case DeliveryMethod.merchantDelivery:
         return 'seller_delivery';
       case DeliveryMethod.expedition:
-        return 'expedition';
+        return 'expedition_return';
     }
   }
 
@@ -75,7 +75,7 @@ extension DeliveryMethodX on DeliveryMethod {
         return DeliveryMethod.renterPickup;
       case 'seller_delivery' :
         return DeliveryMethod.merchantDelivery;
-      case 'expedition' :
+      case 'expedition_return' :
         return DeliveryMethod.expedition;
       default:
         return DeliveryMethod.renterPickup;

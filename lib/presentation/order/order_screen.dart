@@ -197,10 +197,11 @@ class _OrderScreenState extends State<OrderScreen> {
                               enabledButton: false,
 
                               onTap: () {
+                                context.read<OrderViewmodel>().setSelectedOrderModel(item);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => OrderDetailScreen(orderData: item,),
+                                    builder: (_) => OrderDetailScreen(),
                                   ),
                                 );
                               },

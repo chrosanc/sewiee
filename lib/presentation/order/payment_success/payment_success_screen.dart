@@ -2,233 +2,354 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sewiee/app/theme.dart';
 import 'package:sewiee/data/model/order_model.dart';
-import 'package:sewiee/main.dart';
-import 'package:sewiee/presentation/order/checkout/checkout_viewmodel.dart';
+import 'package:sewiee/presentation/main/main_screen.dart';
+import 'package:sewiee/presentation/main/main_viewmodel.dart';
+import 'package:sewiee/presentation/order/order_viewmodel.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
-  const PaymentSuccessScreen({super.key});
+  final OrderModel orderModel;
+
+  const PaymentSuccessScreen({
+    super.key,
+    required this.orderModel,
+  });
 
   @override
   State<PaymentSuccessScreen> createState() => _PaymentSuccessScreenState();
 }
 
-class _PaymentSuccessScreenState extends State<PaymentSuccessScreen> {
-  bool isLoading = false;
-  String? orderNumber;
-  DateTime? paymentTime;
+class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _scaleAnim;
+  late Animation<double> _fadeAnim;
 
   @override
   void initState() {
     super.initState();
-    _fetchOrderData();
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _scaleAnim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.elasticOut,
+    );
+    _fadeAnim = CurvedAnimation(
+      parent: _animController,
+      curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
+    );
+    _animController.forward();
   }
 
-  Future<void> _fetchOrderData() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      // Ambil order terakhir dari user menggunakan viewmodel yang sudah ada
-      final vm = Provider.of<CheckoutViewmodel>(context, listen: false);
-
-      if (vm.orderModel != null) {
-        setState(() {
-          orderNumber = vm.orderModel!.orderNumber;
-          paymentTime = vm.orderModel!.createdAt;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error fetching order data: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
+    final vm = Provider.of<OrderViewmodel>(context, listen: false);
+    final orderModel = widget.orderModel;
+    final primaryColor = themeData.primaryColor;
+
+    final formattedDate =
+        '${orderModel.createdAt.day.toString().padLeft(2, '0')}/'
+        '${orderModel.createdAt.month.toString().padLeft(2, '0')}/'
+        '${orderModel.createdAt.year}';
+    final formattedTime =
+        '${orderModel.createdAt.hour.toString().padLeft(2, '0')}:'
+        '${orderModel.createdAt.minute.toString().padLeft(2, '0')}';
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F7FA),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Icon Sukses
+              // ── Header Banner ──────────────────────────────────────────
               Container(
-                width: 120,
-                height: 120,
+                width: double.infinity,
                 decoration: BoxDecoration(
-                  color: themeData.primaryColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      primaryColor.withOpacity(0.85),
+                      primaryColor,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(32),
+                    bottomRight: Radius.circular(32),
+                  ),
                 ),
-                child: Icon(
-                  Icons.check_circle_outline,
-                  size: 64,
-                  color: themeData.primaryColor,
-                ),
-              ),
+                padding: const EdgeInsets.fromLTRB(24, 48, 24, 40),
+                child: Column(
+                  children: [
+                    // Animated check icon
+                    ScaleTransition(
+                      scale: _scaleAnim,
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.15),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Center(
+                          child: Container(
+                            width: 68,
+                            height: 68,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Icon(
+                              Icons.check_rounded,
+                              size: 36,
+                              color: primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
-              const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
-              // Title
-              Text(
-                'Pembayaran Berhasil!',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                    // Title
+                    FadeTransition(
+                      opacity: _fadeAnim,
+                      child: const Text(
+                        'Pembayaran Berhasil!',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          letterSpacing: 0.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    FadeTransition(
+                      opacity: _fadeAnim,
+                      child: Text(
+                        'Terima kasih telah menyelesaikan\npembayaran Anda.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white.withOpacity(0.78),
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: 16),
 
-              // Subtitle
-              Text(
-                'Terima kasih telah menyelesaikan pembayaran Anda.',
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                textAlign: TextAlign.center,
+              // ── Status Badge ───────────────────────────────────────────
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAF3DE),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_circle, size: 14, color: Color(0xFF3B6D11)),
+                    SizedBox(width: 5),
+                    Text(
+                      'Lunas',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF3B6D11),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
 
-              // Order Number Card
-              if (orderNumber != null) ...[
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+              // ── Info Cards ─────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: FadeTransition(
+                  opacity: _fadeAnim,
                   child: Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Icon(Icons.receipt_long, color: Colors.grey.shade600),
-                          Text(
-                            'Nomor Pesanan',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
+                      _InfoCard(
+                        icon: Icons.receipt_long_outlined,
+                        label: 'Nomor Pesanan',
+                        value: orderModel.orderNumber,
+                        valueColor: primaryColor,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        orderNumber!,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: themeData.primaryColor,
-                        ),
+                      const SizedBox(height: 10),
+                      _InfoCard(
+                        icon: Icons.access_time_outlined,
+                        label: 'Waktu Pembayaran',
+                        value: '$formattedDate   $formattedTime',
                       ),
                     ],
                   ),
                 ),
+              ),
 
-                const SizedBox(height: 12),
+              const SizedBox(height: 28),
 
-                // Payment Time Card
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Icon(Icons.access_time, color: Colors.grey.shade600),
-                          Text(
-                            'Waktu Pembayaran',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
+              // ── Divider ────────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Divider(color: Colors.grey.shade200, height: 1),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ── Buttons ────────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    // Primary button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          context.read<MainViewmodel>().navigateToPages(3);
+                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => MainScreen()), (route)=>false);
+                        },
+                        icon: const Icon(Icons.history_rounded, size: 20),
+                        label: const Text('Lihat Riwayat Pesanan'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        paymentTime != null
-                            ? '${paymentTime!.day}/${paymentTime!.month}/${paymentTime!.year} ${paymentTime!.hour.toString().padLeft(2, '0')}:${paymentTime!.minute.toString().padLeft(2, '0')}'
-                            : '-',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade800,
+                          textStyle: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // Outline button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          context.read<MainViewmodel>().navigateToPages(0);
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(builder: (_) => MainScreen()),
+                              (route) => false
+                          );
+                        },
+                        icon: const Icon(Icons.home_outlined, size: 20),
+                        label: const Text('Kembali ke Beranda'),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: primaryColor, width: 1.5),
+                          foregroundColor: primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-
-              const SizedBox(height: 32),
-
-              Column(
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/order-history',
-                        (route) => false,
-                      );
-                    },
-                    icon: const Icon(Icons.history),
-                    label: const Text('Lihat Riwayat Pesanan'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: themeData.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.of(
-                        context,
-                      ).pushNamedAndRemoveUntil('/home', (route) => false);
-                    },
-                    icon: const Icon(Icons.home_outlined),
-                    label: const Text('Kembali ke Beranda'),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: themeData.primaryColor),
-                      foregroundColor: themeData.primaryColor,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
               ),
+
+              const SizedBox(height: 24),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Reusable info card widget ─────────────────────────────────────────────────
+class _InfoCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  const _InfoCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE6F1FB),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, size: 20, color: const Color(0xFF185FA5)),
+          ),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: valueColor ?? Colors.black87,
+                  letterSpacing: valueColor != null ? 0.4 : 0,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
