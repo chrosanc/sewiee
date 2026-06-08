@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sewiee/app/utils/date_format.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/domain/enum/order_status.dart';
 
@@ -509,7 +510,7 @@ class RenterBannerConfig {
           subtitleColor: const Color(0xFF7F77DD),
           title: 'Sedang disewa',
           subtitle:
-          'Periode sewa aktif • ${orderData?.rental.startDate ?? '-'}',
+          'Waktu : ${orderData!.rental.totalDuration} ${orderData.productSnapshot.durationType} • ${DateFormat.formatDateOnly(orderData!.rental.startDate!)} - ${DateFormat.formatDateOnly(orderData.rental.endDate!)}',
         );
 
     /// =========================

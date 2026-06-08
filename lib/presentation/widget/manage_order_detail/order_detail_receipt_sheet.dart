@@ -5,7 +5,8 @@ import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_prim
 
 Future<String?> showReceiptNumberSheet(
   BuildContext context, {
-    required TextEditingController controller,
+    required TextEditingController receiptNumberController,
+      required TextEditingController courierNameController,
   required OrderModel order,
 }) {
   final formKey = GlobalKey<FormState>();
@@ -115,7 +116,41 @@ Future<String?> showReceiptNumberSheet(
                       ),
                       const SizedBox(height: 6),
                       TextFormField(
-                        controller: controller,
+                        controller: receiptNumberController,
+                        autofocus: true,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: OrderDetailTheme.textPrimary,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Contoh: JNE1234567890',
+                          hintStyle: const TextStyle(
+                            fontSize: 13,
+                            color: OrderDetailTheme.textDisabled,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.barcode_reader,
+                            size: 18,
+                            color: OrderDetailTheme.textDisabled,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: _inputBorder(),
+                          enabledBorder: _inputBorder(),
+                          focusedBorder: _inputBorder(color: OrderDetailTheme.textPrimary, width: 1),
+                          errorBorder: _inputBorder(color: const Color(0xFFE24B4A)),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Nomor resi tidak boleh kosong';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 5),
+                      TextFormField(
+                        controller: receiptNumberController,
                         autofocus: true,
                         style: const TextStyle(
                           fontSize: 13,

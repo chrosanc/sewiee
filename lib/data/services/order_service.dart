@@ -14,14 +14,27 @@ class OrderService {
   Future<OrderModel> updateOrderStatus({
     required String orderId,
     required OrderStatus newStatus,
+    DateTime? rentalStartDate,
+    DateTime? rentalEndDate,
   }) async {
 
     final docRef = _firestore.collection('order').doc(orderId);
 
-    await docRef.update({
+    final Map<String, dynamic> updateData = {
       'status': newStatus.value,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
+    };
+
+    // optional update rental date
+    if (rentalStartDate != null) {
+      updateData['rental.start_date'] = Timestamp.fromDate(rentalStartDate);
+    }
+
+    if (rentalEndDate != null) {
+      updateData['rental.end_date'] = Timestamp.fromDate(rentalEndDate);
+    }
+
+    await docRef.update(updateData);
 
     // ambil data terbaru
     final snapshot = await docRef.get();
@@ -29,10 +42,43 @@ class OrderService {
     return OrderModel.fromJson(snapshot.data()!);
   }
 
+
+  Future<OrderModel> updateDeliveredStatus({
+    required String orderId,
+    required OrderStatus newStatus,
+    required DateTime deliveredAt,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+
+    final docRef = _firestore.collection('order').doc(orderId);
+
+    final Map<String, dynamic> updateData = {
+      'status': newStatus.value,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+      updateData['shipping.delivery_tracking.delivered_at'] = Timestamp.fromDate(deliveredAt);
+    // optional update rental date
+      updateData['rental.start_date'] = Timestamp.fromDate(startDate);
+      updateData['rental.end_date'] = Timestamp.fromDate(endDate);
+
+
+    await docRef.update(updateData);
+
+    // ambil data terbaru
+    final snapshot = await docRef.get();
+
+    return OrderModel.fromJson(snapshot.data()!);
+  }
+
+
   Future<void> submitReturnReceipt({
     required String orderId,
     required String receiptNumber,
+    required String courierName,
+    required String courierCode,
   }) async {
+
     await _firestore
         .collection('order')
         .doc(orderId)
@@ -40,11 +86,31 @@ class OrderService {
 
       'status': OrderStatus.returnOnDelivery.value,
 
+      // return tracking
       'shipping.returnTracking.receiptNumber':
       receiptNumber,
 
-      'shipping.returnTracking.createdAt':
+      'shipping.returnTracking.courierName':
+      courierName,
+
+      'shipping.returnTracking.courierCode':
+      courierCode,
+
+      // waktu renter kirim barang
+      'shipping.returnTracking.shippedAt':
       FieldValue.serverTimestamp(),
+
+      // nanti owner confirm
+      'shipping.returnTracking.deliveredAt':
+      null,
+
+      // nanti owner klik barang diterima
+      'shipping.returnTracking.receivedAt':
+      null,
+
+      // status tracking
+      'shipping.returnTracking.status':
+      'on_delivery',
 
       'updatedAt':
       FieldValue.serverTimestamp(),

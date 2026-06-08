@@ -103,25 +103,132 @@ class OrderViewmodel extends ChangeNotifier {
     }
   }
 
-  Future<void> submitReturnReceipt({
-    required String orderId,
-    required String receiptNumber,
-  }) async {
-      _showLoadingDialog();
+  Future<void> updateDeliveredStatus() async {
+    _showLoadingDialog();
     try {
 
+      final startDate = DateTime.now();
 
-      await _orderRepository.submitReturnReceipt(
-        orderId: orderId,
-        receiptNumber: receiptNumber,
+      final endDate = OrderUtils.rentalEndDate(
+        startDate: startDate,
+        totalDuration: selectedOrderModel!.rental.totalDuration,
+        durationType: selectedOrderModel!.productSnapshot.durationType,
       );
 
-    }catch(e) {
-      debugPrint(e.toString());
-    }finally {
+      final deliveredAt = DateTime.now();
+      selectedOrderModel = await _orderRepository.updateDeliveredStatus(
+        orderId: selectedOrderModel!.id,
+        newStatus: OrderStatus.onRent,
+        deliveredAt: deliveredAt,
+        startDate: startDate,
+        endDate: endDate,
+      );
+      notifyListeners();
 
+    } finally {
       _hideLoadingDialog();
     }
+  }
+
+  // =========================
+// RETURN FLOW
+// =========================
+
+  Future<OrderModel> confirmOrderReceived(OrderModel order) {
+    return _runOrderMutation(() async {
+
+      final startDate = DateTime.now();
+
+      final endDate = OrderUtils.rentalEndDate(
+        startDate: startDate,
+        totalDuration: order.rental.totalDuration,
+        durationType: order.productSnapshot.durationType,
+      );
+
+      final updatedOrder = await _orderRepository.updateDeliveredStatus(
+        orderId: order.id,
+        newStatus: OrderStatus.onRent,
+        deliveredAt: DateTime.now(),
+        startDate: startDate,
+        endDate: endDate,
+      );
+
+      selectedOrderModel = updatedOrder;
+      notifyListeners();
+
+      return updatedOrder;
+    }, debugLabel: 'CONFIRM ORDER RECEIVED ERROR');
+  }
+
+  Future<OrderModel> submitReturnByExpedition({
+    required OrderModel order,
+    required String receiptNumber,
+  }) {
+    return _runOrderMutation(() async {
+
+      await _orderRepository.submitReturnReceipt(
+        orderId: order.id,
+        receiptNumber: receiptNumber,
+        courierCode: ,
+        courierName: ,
+      );
+
+      final updatedOrder = order.copyWith(
+        status: OrderStatus.returnOnDelivery,
+        shipping: order.shipping.copyWith(
+          returnTracking: (
+              order.shipping.returnTracking ?? const ReturnTracking()
+          ).copyWith(
+            receiptNumber: receiptNumber,
+            status: 'on_delivery',
+            shippedAt: DateTime.now(),
+          ),
+        ),
+      );
+
+      selectedOrderModel = updatedOrder;
+      notifyListeners();
+
+      return updatedOrder;
+    }, debugLabel: 'SUBMIT RETURN RECEIPT ERROR');
+  }
+
+  Future<OrderModel> confirmReturnReceived(OrderModel order) {
+    return _runOrderMutation(() async {
+
+      final updatedOrder = await _orderRepository.updateOrderStatus(
+        orderId: order.id,
+        newStatus: OrderStatus.returned,
+      );
+
+      selectedOrderModel = updatedOrder;
+      notifyListeners();
+
+      return updatedOrder;
+    }, debugLabel: 'CONFIRM RETURN RECEIVED ERROR');
+  }
+
+// =========================
+// PENALTY FLOW
+// =========================
+
+  Future<OrderModel> payDamagePenalty(OrderModel order) {
+    return _runOrderMutation(() async {
+
+      await _orderRepository.payPenalty(
+        orderId: order.id,
+      );
+
+      final updatedOrder = await _orderRepository.updateOrderStatus(
+        orderId: order.id,
+        newStatus: OrderStatus.completed,
+      );
+
+      selectedOrderModel = updatedOrder;
+      notifyListeners();
+
+      return updatedOrder;
+    }, debugLabel: 'PAY DAMAGE PENALTY ERROR');
   }
 
   Future<void> payPenalty({

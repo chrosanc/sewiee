@@ -50,33 +50,56 @@ class OrderRepository {
     return _service.streamOrderByOwnerId(ownerId);
   }
 
-  Stream<OrderModel> streamOrder(String orderId){
+  Stream<OrderModel> streamOrder(String orderId) {
     return _service.streamOrderStatus(orderId);
   }
 
   Future<OrderModel> updateOrderStatus({
     required String orderId,
     required OrderStatus newStatus,
+    DateTime? rentalStartDate,
+    DateTime? rentalEndDate,
   }) {
-    return _service.updateOrderStatus(orderId: orderId, newStatus: newStatus);
+    return _service.updateOrderStatus(
+      orderId: orderId,
+      newStatus: newStatus,
+      rentalStartDate: rentalStartDate,
+      rentalEndDate: rentalEndDate,
+    );
+  }
+
+  Future<OrderModel> updateDeliveredStatus({
+    required String orderId,
+    required OrderStatus newStatus,
+    required DateTime deliveredAt,
+    required DateTime startDate,
+    required DateTime endDate,
+  }) {
+    return _service.updateDeliveredStatus(
+      orderId: orderId,
+      newStatus: newStatus,
+      deliveredAt: deliveredAt,
+      startDate: startDate,
+      endDate: endDate,
+    );
   }
 
   Future<void> submitReturnReceipt({
     required String orderId,
     required String receiptNumber,
+    required String courierName,
+    required String courierCode,
   }) {
     return _service.submitReturnReceipt(
       orderId: orderId,
       receiptNumber: receiptNumber,
+      courierName: courierName,
+      courierCode: courierCode,
     );
   }
 
-  Future<void> payPenalty({
-    required String orderId,
-  }) {
-    return _service.payPenalty(
-      orderId: orderId,
-    );
+  Future<void> payPenalty({required String orderId}) {
+    return _service.payPenalty(orderId: orderId);
   }
 
   Future<void> updateRentDate({
@@ -101,7 +124,15 @@ class OrderRepository {
     );
   }
 
-  Future<void> updateInspection({required String orderId, required int fine, required String status}) {
-    return _service.updateInspection(orderId: orderId, brokenFine: fine, status: status);
+  Future<void> updateInspection({
+    required String orderId,
+    required int fine,
+    required String status,
+  }) {
+    return _service.updateInspection(
+      orderId: orderId,
+      brokenFine: fine,
+      status: status,
+    );
   }
 }

@@ -157,10 +157,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             // =========================
             onConfirmArrived: () async {
 
-              await vm.updateRenterOrderStatus(
-                orderId: order.id,
-                status: OrderStatus.delivered,
-              );
+              await vm.updateDeliveredStatus();
             },
 
             // =========================
