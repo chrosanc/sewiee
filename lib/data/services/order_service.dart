@@ -1,15 +1,24 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:midtrans_sdk/midtrans_sdk.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/data/model/payment_model.dart';
+import 'package:sewiee/data/model/user_model.dart';
 import 'package:sewiee/domain/enum/order_status.dart';
+import 'package:http/http.dart' as http;
 
 class OrderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseFunctions _functions = FirebaseFunctions.instanceFor(
     region: 'asia-southeast2',
   );
+
+  final midtransUrl = 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+  final midtransKey = dotenv.get('MIDTRANS_SERVER_API_KEY');
 
   Future<OrderModel> updateOrderStatus({
     required String orderId,
@@ -58,6 +67,7 @@ class OrderService {
       'updatedAt': FieldValue.serverTimestamp(),
     };
       updateData['shipping.delivery_tracking.delivered_at'] = Timestamp.fromDate(deliveredAt);
+      updateData['shipping.delivery_tracking.status'] = 'delivered';
     // optional update rental date
       updateData['rental.start_date'] = Timestamp.fromDate(startDate);
       updateData['rental.end_date'] = Timestamp.fromDate(endDate);
@@ -76,7 +86,6 @@ class OrderService {
     required String orderId,
     required String receiptNumber,
     required String courierName,
-    required String courierCode,
   }) async {
 
     await _firestore
@@ -87,51 +96,29 @@ class OrderService {
       'status': OrderStatus.returnOnDelivery.value,
 
       // return tracking
-      'shipping.returnTracking.receiptNumber':
+      'shipping.return_tracking.receipt_number':
       receiptNumber,
 
-      'shipping.returnTracking.courierName':
+      'shipping.return_tracking.courier_name':
       courierName,
 
-      'shipping.returnTracking.courierCode':
-      courierCode,
-
       // waktu renter kirim barang
-      'shipping.returnTracking.shippedAt':
+      'shipping.return_tracking.shipped_at':
       FieldValue.serverTimestamp(),
 
       // nanti owner confirm
-      'shipping.returnTracking.deliveredAt':
-      null,
-
-      // nanti owner klik barang diterima
-      'shipping.returnTracking.receivedAt':
-      null,
+      'shipping.return_tracking.delivered_at': FieldValue.serverTimestamp(),
 
       // status tracking
-      'shipping.returnTracking.status':
+      'shipping.return_tracking.status':
       'on_delivery',
 
-      'updatedAt':
+      'updated_at':
       FieldValue.serverTimestamp(),
     });
   }
 
-  Future<void> payPenalty({
-    required String orderId,
-  }) async {
 
-    await _firestore
-        .collection('order')
-        .doc(orderId)
-        .update({
-
-      'penalty.isPaid': true,
-
-      'updatedAt':
-      FieldValue.serverTimestamp(),
-    });
-  }
 
   Future<void> createOrder(OrderModel orderData) async {
     return await _firestore
@@ -214,6 +201,37 @@ class OrderService {
     });
   }
 
+  Future<void> updateOnReturnDelivered({
+    required String orderId,
+    required DateTime receivedAt,
+  }) {
+    return _firestore
+        .collection('order')
+        .doc(orderId)
+        .update({
+
+      // =========================
+      // RETURN TRACKING
+      // =========================
+
+      'shipping.return_tracking.delivered_at': receivedAt,
+
+      'shipping.return_tracking.status': OrderStatus.delivered.value,
+
+      // =========================
+      // ORDER STATUS
+      // =========================
+
+      'status': OrderStatus.onInspection.value,
+
+      // =========================
+      // TIMESTAMP
+      // =========================
+
+      'updated_at': FieldValue.serverTimestamp(),
+    });
+  }
+
   Future<void> updateInspection({
     required String orderId,
     required String status,
@@ -250,4 +268,51 @@ class OrderService {
       Map<String, dynamic>.from(result.data),
     );
   }
+
+  Future<Map<String,dynamic>> createPenaltyTransaction({
+    required OrderModel order, required UserModel userModel
+})async{
+
+    final response = await http.post(Uri.parse(midtransUrl, ), headers: {
+      'Accept' : 'application/json',
+      'Content-Type' : 'application/json',
+      'Authorization' : 'Basic ${base64.encode(utf8.encode('$midtransKey:'))}'
+    },
+      body: jsonEncode({
+        'transaction_details' : {
+          'order_id' : 'PENALTY-${order.orderNumber}-${DateTime.now().millisecondsSinceEpoch}',
+          'gross_amount' : order.rental.brokenFine
+        },
+        "credit_card" : {
+          'secure' : true,
+        },
+        "customer_details" : {
+          "first_name" : order.renterSnapshot.name,
+          "email" : userModel.email,
+          "phone" : order.renterSnapshot.phoneNumber
+        }
+      })
+    );
+
+
+    if(response.statusCode != 201) {
+      debugPrint('PENALTYTRANSACTION ERROR : ${response.body}');
+    }
+    return jsonDecode(response.body);
+  }
+
+  // Future<void> updatePaidPenaltyStatus({
+  //   required String orderId,
+  // }) async {
+  //   await _firestore
+  //       .collection('order')
+  //       .doc(orderId)
+  //       .update({
+  //
+  //     'updatedAt':
+  //     FieldValue.serverTimestamp(),
+  //   });
+  // }
+
+
 }

@@ -143,18 +143,18 @@ class RenterOrderBottomBar extends StatelessWidget {
     // RETURN DELIVERY
     // =========================
       case OrderStatus.returnOnDelivery:
-        return ElevatedButton.icon(
-          onPressed: onTrackReturn,
-          icon: const Icon(Icons.local_shipping_outlined),
-          label: const Text('Lacak Pengembalian'),
-          style: _primaryStyle(),
-        );
+        return null;
+        //   ElevatedButton.icon(
+        //   onPressed: onTrackReturn,
+        //   icon: const Icon(Icons.local_shipping_outlined),
+        //   label: const Text('Lacak Pengembalian'),
+        //   style: _primaryStyle(),
+        // );
 
     // =========================
     // DAMAGE / LATE
     // =========================
       case OrderStatus.damageClaim:
-      case OrderStatus.lateReturn:
         return ElevatedButton.icon(
           onPressed: onPayPenalty,
           icon: const Icon(Icons.payments_outlined),
@@ -165,6 +165,8 @@ class RenterOrderBottomBar extends StatelessWidget {
             minimumSize: const Size.fromHeight(52),
           ),
         );
+      case OrderStatus.lateReturn:
+
 
       default:
         return null;

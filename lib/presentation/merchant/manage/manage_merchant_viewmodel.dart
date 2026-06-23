@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sewiee/app/utils/toast.dart';
 import 'package:sewiee/data/model/category_model.dart';
+import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/data/model/product_model.dart';
 import 'package:sewiee/data/model/user_model.dart';
 import 'package:sewiee/domain/repositories/category_repository.dart';
@@ -36,6 +37,8 @@ class ManageMerchantViewmodel extends ChangeNotifier {
   List<ProductModel> listProduct = [];
   ProductModel? productModel;
   ProductRepository productRepository = ProductRepository();
+
+  List<OrderModel> listOrder = [];
 
   // Product Photo
   List<dynamic> productPhotos = [];

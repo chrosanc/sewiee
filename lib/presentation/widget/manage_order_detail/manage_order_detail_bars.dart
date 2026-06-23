@@ -163,15 +163,16 @@ class ManageOrderBottomBar extends StatelessWidget {
         return null;
       case OrderStatus.returnOnDelivery:
         return ActionButton.primary(
-          label: 'Tandai Sudah Dikembalikan',
-          onTap: onMarkReturned,
+          label: 'Barang diterima',
+          onTap: onConfirmReturn,
         );
-      case OrderStatus.returned:
-        return ActionButton.primary(label: 'Barang Diterima', onTap: onMarkReturned);
       case OrderStatus.onInspection:
         return ActionButton.primary(label: 'Selesaikan Pesanan', onTap: onInspection);
       case OrderStatus.damageClaim:
         return null;
+      case OrderStatus.returned:
+        return null;
+
       default:
         return null;
     }

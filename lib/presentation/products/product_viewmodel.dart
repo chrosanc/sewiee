@@ -19,6 +19,11 @@ class ProductViewmodel extends ChangeNotifier {
   void _showLoadingDialog() => _loadingManager.showLoading();
   void _hideLoadingDialog() => _loadingManager.hideLoading();
 
+  void setProductModel(ProductModel model){
+    product = model;
+    notifyListeners();
+  }
+
   Future<void> getDetailedProduct (BuildContext context, String productId) async {
     isLoading = true;
     _showLoadingDialog();

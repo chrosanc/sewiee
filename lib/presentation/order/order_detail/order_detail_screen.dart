@@ -7,12 +7,13 @@ import 'package:sewiee/app/utils/helpers/order_utils.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/domain/enum/delivery_method_enum.dart';
 import 'package:sewiee/domain/enum/order_status.dart';
+import 'package:sewiee/presentation/order/checkout/payment/midtrans_snap_screen.dart';
 import 'package:sewiee/presentation/order/order_viewmodel.dart';
 import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_receipt_sheet.dart';
+import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_return_receipt_sheet.dart';
 import 'package:sewiee/presentation/widget/order_detail/order_detail_bottom_bar.dart';
 
 class OrderDetailScreen extends StatefulWidget {
-
   const OrderDetailScreen({super.key});
 
   @override
@@ -70,25 +71,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
     super.dispose();
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
-
     return StreamBuilder<OrderModel>(
       stream: vm.streamOrder(),
 
       builder: (context, snapshot) {
-
         // =========================
         // LOADING
         // =========================
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -97,11 +91,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         // =========================
         if (snapshot.hasError) {
           return Scaffold(
-            body: Center(
-              child: Text(
-                'Terjadi kesalahan: ${snapshot.error}',
-              ),
-            ),
+            body: Center(child: Text('Terjadi kesalahan: ${snapshot.error}')),
           );
         }
 
@@ -110,11 +100,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         // =========================
         if (!snapshot.hasData) {
           return const Scaffold(
-            body: Center(
-              child: Text(
-                'Pesanan tidak ditemukan',
-              ),
-            ),
+            body: Center(child: Text('Pesanan tidak ditemukan')),
           );
         }
 
@@ -129,7 +115,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
           // BOTTOM BAR
           // =========================
           bottomNavigationBar: RenterOrderBottomBar(
-
             status: order.status,
 
             deliveryMethod: DeliveryMethodX.fromString(
@@ -141,22 +126,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             // =========================
             // BAYAR
             // =========================
-            onPay: () async {
-
-            },
+            onPay: () async {},
 
             // =========================
             // CANCEL
             // =========================
-            onCancel: () async {
-
-            },
+            onCancel: () async {},
 
             // =========================
             // BARANG SAMPAI
             // =========================
             onConfirmArrived: () async {
-
               await vm.updateDeliveredStatus();
             },
 
@@ -164,7 +144,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             // MULAI SEWA
             // =========================
             onStartRent: () async {
-
               await vm.updateRenterOrderStatus(
                 orderId: order.id,
                 status: OrderStatus.onRent,
@@ -175,29 +154,27 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             // PENGEMBALIAN
             // =========================
             onSubmitReturn: () async {
-
               final isExpedition =
-                  order.shipping.returnMethod ==
-                      'expedition_return';
+                  order.shipping.returnMethod == 'expedition_return';
 
               // =========================
               // RETURN VIA EXPEDITION
               // =========================
               if (isExpedition) {
+                final receiptNumberController = TextEditingController();
+                final courierNameController = TextEditingController();
 
-                final controller = TextEditingController();
-
-                final receipt = await showReceiptNumberSheet(
+                final receipt = await showReturnReceiptNumberSheet(
                   context,
-                  controller: controller,
-                  order: order,
+                  receiptNumberController: receiptNumberController,
+                  courierNameController: courierNameController,
                 );
 
                 if (receipt == null) return;
 
-                await vm.submitReturnReceipt(
-                  orderId: order.id,
-                  receiptNumber: receipt,
+                await vm.submitReturnByExpedition(
+                  receiptNumber: receipt['receipt_number']!,
+                  courierName: receipt['courier_name']!,
                 );
 
                 return;
@@ -208,30 +185,45 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
               // =========================
               await vm.updateRenterOrderStatus(
                 orderId: order.id,
-                status: OrderStatus.returned,
+                status: OrderStatus.returnOnDelivery,
               );
             },
 
             // =========================
             // TRACK RETURN
             // =========================
-            onTrackReturn: () {
-
-            },
+            onTrackReturn: () {},
 
             // =========================
             // PAY PENALTY
             // =========================
             onPayPenalty: () async {
 
+              final vm = context.read<OrderViewmodel>();
+
+              final response = await vm.payDamagePenalty(
+                order
+              );
+
+              final snapToken = response['token'];
+
+              if (snapToken == null) return;
+
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MidtransSnapScreen(
+                    orderId: order.id,
+                    snapToken: snapToken,
+                  ),
+                ),
+              );
             },
 
             // =========================
             // HELP
             // =========================
-            onHelp: () {
-
-            },
+            onHelp: () {},
           ),
 
           // =========================
@@ -249,11 +241,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
 
                 child: Column(
                   children: [
-
-                    _StatusBannerCard(
-                      status: order.status,
-                      model: order,
-                    ),
+                    _StatusBannerCard(status: order.status, model: order),
 
                     _buildOrderMeta(order),
 
@@ -330,11 +318,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         children: [
           _sectionTitle('Status Pesanan', Icons.receipt_long_outlined),
           const SizedBox(height: 16),
-          _metaRow(
-            'Kode Pesanan',
-            order!.orderNumber,
-            copyable: true,
-          ),
+          _metaRow('Kode Pesanan', order!.orderNumber, copyable: true),
           const SizedBox(height: 10),
           _metaRow(
             'Tanggal Pembayaran',
@@ -344,18 +328,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
       ),
     );
   }
+
   // ── Store Card ─────────────────────────────────────────────────────────────
-  Widget _buildStoreCard(OrderModel order){
+  Widget _buildStoreCard(OrderModel order) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _sectionTitle('Detail Toko', Icons.store_outlined),
           const SizedBox(height: 16),
-          _metaRow(
-            'Nama Toko',
-            order?.ownerSnapshot.storeName ?? '',
-          ),
+          _metaRow('Nama Toko', order?.ownerSnapshot.storeName ?? ''),
           const SizedBox(height: 10),
           _metaRow(
             'Nomor Handphone Toko',
@@ -485,7 +467,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
               icon: Icons.numbers_rounded,
               label: 'Nomor Resi',
               value:
-              order.shipping.deliveryTracking?.receiptNumber ??
+                  order.shipping.deliveryTracking?.receiptNumber ??
                   'Belum dikirim',
               trailing: _chipLabel(
                 order.shipping.deliveryTracking?.courierName ?? '',
@@ -538,13 +520,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
             _infoTile(
               icon: Icons.numbers_rounded,
               label: 'Nomor Resi',
-              value: order.shipping.returnTracking?.receiptNumber ??
+              value:
+                  order.shipping.returnTracking?.receiptNumber ??
                   'Belum melakukan pengembalian',
-              trailing:
-              order.shipping.returnTracking?.courierName != null
-                  ? _chipLabel(
-                order.shipping.returnTracking!.courierName,
-              )
+              trailing: order.shipping.returnTracking?.courierName != null
+                  ? _chipLabel(order.shipping.returnTracking!.courierName)
                   : null,
             ),
           ],
@@ -569,45 +549,33 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
         children: [
           _sectionTitle('Rincian Pembayaran', Icons.payment_outlined),
           const SizedBox(height: 16),
-          _metaRow(
-            'Metode Pembayaran',
-            order!.payment.paymentMethod.name,
-          ),
+          _metaRow('Metode Pembayaran', order!.payment.paymentMethod.name),
           const SizedBox(height: 10),
           _metaRow(
             'Total Harga (${order.rental.totalDuration} ${order.productSnapshot.durationType})',
             CurrencyUtils().toRupiah(
-              order.productSnapshot.price *
-                  order.rental.totalDuration,
+              order.productSnapshot.price * order.rental.totalDuration,
             ),
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Deposit Jaminan',
-            CurrencyUtils().toRupiah(
-              order.payment.amount.depositAmount,
-            ),
+            CurrencyUtils().toRupiah(order.payment.amount.depositAmount),
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Ongkos Kirim',
-            CurrencyUtils().toRupiah(
-              order.payment.amount.deliveryFee,
-            ),
+            CurrencyUtils().toRupiah(order.payment.amount.deliveryFee),
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Biaya Layanan',
-            CurrencyUtils().toRupiah(
-              order.payment.amount.serviceFee,
-            ),
+            CurrencyUtils().toRupiah(order.payment.amount.serviceFee),
           ),
           const SizedBox(height: 10),
           _metaRow(
             'Biaya Jasa Aplikasi',
-            CurrencyUtils().toRupiah(
-              order.payment.amount.applicationFee,
-            ),
+            CurrencyUtils().toRupiah(order.payment.amount.applicationFee),
           ),
 
           // const SizedBox(height: 10),
@@ -643,7 +611,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen>
   }
 
   // ── Action Button ────────────────────────────────────────────────────────────
-
 
   // ── Reusable helpers ─────────────────────────────────────────────────────────
 

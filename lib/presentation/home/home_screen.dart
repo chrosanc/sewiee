@@ -132,10 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       imageUrl:      item.images.first,
                       storeLocation: item.address.district,
                       onTap: () {
-                        context.read<ProductViewmodel>().getDetailedProduct(
-                          context,
-                          item.id,
-                        );
+                        context.read<ProductViewmodel>().setProductModel(item);
                         Navigator.push(
                           context,
                           MaterialPageRoute(

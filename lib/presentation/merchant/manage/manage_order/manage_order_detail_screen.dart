@@ -78,7 +78,7 @@ class _ManageOrderDetailScreenState extends State<ManageOrderDetailScreen> {
       receiptNumber = await showReceiptNumberSheet(
         context,
         order: _order,
-        controller: receiptNumberController,
+        receiptNumberController: receiptNumberController,
       );
       if (receiptNumber == null || receiptNumber.isEmpty) return;
     }
@@ -106,6 +106,10 @@ class _ManageOrderDetailScreenState extends State<ManageOrderDetailScreen> {
   Future<void> _onStartRent() {
     return _performOrderAction((vm) => vm.markOrderOnRent(_order));
   }
+  
+  Future<void> _onConfirmReturn() {
+    return _performOrderAction((vm) => vm.markReceived(_order));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +129,7 @@ class _ManageOrderDetailScreenState extends State<ManageOrderDetailScreen> {
         onProcessed: _onProcessed,
         onMarkPickedUp: _onStartRent,
         onItemOnRent: _onStartRent,
-        onConfirmReturn: () => _changeStatus(OrderStatus.returned),
+        onConfirmReturn: _onConfirmReturn,
         onMarkReturned: () => _changeStatus(OrderStatus.returned),
         onInspection: () => _onInspection(),
         onComplete: () => _changeStatus(OrderStatus.completed),

@@ -29,14 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            Positioned(
-              top: null,
-              bottom: null,
-              child: SvgPicture.asset(
-                'assets/svg/logindecor.svg',
-                width: MediaQuery.of(context).size.width,
-              ),
-            ),
             Center(
               child: Column(
 

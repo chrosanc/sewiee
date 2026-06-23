@@ -147,7 +147,7 @@ class MidtransCustomer {
 
   final String phone;
 
-  final MidtransShippingAddress shippingAddress;
+  final MidtransShippingAddress? shippingAddress;
 
   const MidtransCustomer({
     required this.name,
@@ -155,7 +155,7 @@ class MidtransCustomer {
     required this.email,
 
     required this.phone,
-    required this.shippingAddress,
+    this.shippingAddress,
   });
 
   factory MidtransCustomer.fromJson(Map<String, dynamic> json) {
@@ -175,7 +175,8 @@ class MidtransCustomer {
       "name": name,
       "email": email,
       "phone": phone,
-      'shippingAddress': shippingAddress.toJson()
+      if (shippingAddress != null)
+        'shippingAddress': shippingAddress!.toJson(),
     };
   }
 }
@@ -275,6 +276,7 @@ class MidtransTransactionResponseModel {
 }
 
 class MidtransPaymentData {
+
   final String transactionId;
 
   final String orderId;
@@ -291,42 +293,58 @@ class MidtransPaymentData {
 
   final String? redirectUrl;
 
+  final String? snapToken;
+
   const MidtransPaymentData({
     required this.transactionId,
-
     required this.orderId,
-
     required this.transactionStatus,
-
     required this.paymentType,
-
     this.expiryTime,
-
     required this.vaNumbers,
-
     this.qrString,
-
     this.redirectUrl,
+    this.snapToken,
   });
 
-  factory MidtransPaymentData.fromJson(Map<String, dynamic> json) {
+  factory MidtransPaymentData.fromJson(
+      Map<String, dynamic> json,
+      ) {
     return MidtransPaymentData(
-      transactionId: json['transaction_id'] ?? '',
 
-      orderId: json['order_id'] ?? '',
+      transactionId:
+      json['transaction_id'] ?? '',
 
-      transactionStatus: json['transaction_status'] ?? '',
+      orderId:
+      json['order_id'] ?? '',
 
-      paymentType: json['payment_type'] ?? '',
+      transactionStatus:
+      json['transaction_status'] ?? '',
 
-      expiryTime: json['expiry_time'],
+      paymentType:
+      json['payment_type'] ?? '',
 
-      qrString: json['qr_string'],
+      expiryTime:
+      json['expiry_time'],
 
-      redirectUrl: json['redirect_url'],
+      qrString:
+      json['qr_string'],
 
-      vaNumbers: (json['va_numbers'] as List<dynamic>? ?? [])
-          .map((e) => VANumberModel.fromJson(Map<String, dynamic>.from(e)))
+      redirectUrl:
+      json['redirect_url'],
+
+      snapToken:
+      json['snap_token'],
+
+      vaNumbers:
+      (json['va_numbers']
+      as List<dynamic>? ??
+          [])
+          .map(
+            (e) => VANumberModel.fromJson(
+          Map<String, dynamic>.from(e),
+        ),
+      )
           .toList(),
     );
   }

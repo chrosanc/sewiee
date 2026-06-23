@@ -4,10 +4,13 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fa6_solid.dart';
 import 'package:provider/provider.dart';
 import 'package:sewiee/app/utils/currency_utils.dart';
+import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/data/model/product_model.dart';
+import 'package:sewiee/domain/enum/order_status.dart';
 import 'package:sewiee/presentation/merchant/manage/manage_merchant_viewmodel.dart';
 import 'package:sewiee/presentation/merchant/manage/manage_order/manage_order_screen.dart';
 import 'package:sewiee/presentation/merchant/manage/manage_product/manage_product_screen.dart';
+import 'package:sewiee/presentation/order/order_viewmodel.dart';
 
 // ── Color constants ────────────────────────────────────────────────────────────
 const _bg         = Color(0xFFF5F5F0);
@@ -64,6 +67,7 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<ManageMerchantViewmodel>(context);
+    final orderVm = Provider.of<OrderViewmodel>(context);
 
     return Scaffold(
       body: SafeArea(
@@ -178,6 +182,7 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
                   const SizedBox(height: 10),
 
                   // ── Orders Card ─────────────────────────────────────────
+                  // ── Orders Card ─────────────────────────────────────────
                   _SectionCard(
                     iconData: Fa6Solid.clipboard_list,
                     iconBg: _tealBg,
@@ -187,12 +192,47 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
                     onAction: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => ManageOrderScreen()));
                     },
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        ),
-                      ],
+                    child: StreamBuilder<List<OrderModel>>(
+                      stream: orderVm.streamOrderByOwnerId(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: _tealStrong,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+
+                        final orders = (snapshot.data ?? []).take(5).toList();
+
+                        if (orders.isEmpty) {
+                          return const _EmptyState(message: 'Belum ada Pesanan');
+                        }
+
+                        return ListView.separated(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: orders.length,
+                          separatorBuilder: (_, __) => const Divider(
+                            height: 0.5,
+                            color: _divider,
+                            indent: 14,
+                            endIndent: 14,
+                          ),
+                          itemBuilder: (context, index) {
+                            final order = orders[index];
+                            return _OrderRow(order: order);
+                          },
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -209,6 +249,117 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
     final parts = name.trim().split(' ');
     if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     return name.substring(0, name.length.clamp(0, 2)).toUpperCase();
+  }
+}
+
+// ── Order Row ─────────────────────────────────────────────────────────────────
+class _OrderRow extends StatelessWidget {
+  final OrderModel order;
+  const _OrderRow({required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Thumbnail produk
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  color: const Color(0xFFF5F4F0),
+                  child: Image.network(
+                    order.productSnapshot.image,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.image_not_supported_outlined,
+                      size: 18,
+                      color: _textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+              const Gap(10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    order.productSnapshot.name,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: _textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '#${order.orderNumber}',
+                    style: const TextStyle(fontSize: 10, color: _textSecondary),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(width: 8),
+
+          // Harga + status
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                CurrencyUtils().toRupiah(order.payment.amount.totalPayment),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _amberStrong,
+                ),
+              ),
+              const SizedBox(height: 4),
+              _OrderStatusBadge(status: order.status),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderStatusBadge extends StatelessWidget {
+  final OrderStatus status;
+  const _OrderStatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final (Color bg, Color fg, String label) = switch (status) {
+      OrderStatus.waitingPayment   => (_amberBg,  _amberDark,   'Belum Bayar'),
+      OrderStatus.onDelivery       => (_blueBg,   _blueStrong,  'Dikirim'),
+      OrderStatus.waitingPickup    => (_tealBg,   _tealStrong,  'Ambil'),
+      OrderStatus.onRent           => (_tealBg,   _tealStrong,  'Disewa'),
+      OrderStatus.returnOnDelivery => (_blueBg,   _blueStrong,  'Kembali'),
+      OrderStatus.onInspection     => (_amberBg,  _amberDark,   'Inspeksi'),
+      OrderStatus.damageClaim      => (_coralBg,  _coralStrong, 'Klaim'),
+      OrderStatus.completed        => (_greenBg,  _greenStrong, 'Selesai'),
+      _                            => (_grayBg,   _grayStrong,  status.value),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: fg),
+      ),
+    );
   }
 }
 

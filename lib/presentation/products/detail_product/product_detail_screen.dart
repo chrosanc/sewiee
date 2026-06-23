@@ -18,9 +18,7 @@ import 'package:sewiee/presentation/widget/product/product_card.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class ProductDetailScreen extends StatefulWidget {
-
   const ProductDetailScreen({super.key});
-
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
 }
@@ -238,7 +236,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               zoomControlsEnabled: false,
                               myLocationButtonEnabled: false,
                               onMapCreated: (controller) {
-                                mapController = controller;
+                                setState(() {
+                                  mapController = controller;
+                                });
                               },
                               initialCameraPosition: CameraPosition(
                                 target: LatLng(
@@ -273,54 +273,37 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 vm.product!.rentalTerms.additionalNotes.isNotEmpty)
               _sectionText(
                 title: 'Aturan Sewa',
-                content: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: double.infinity),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Wrap ListTile with constrained width for identity
-                        SizedBox(
-                          width: double.maxFinite,
-                          child: ListTile(
-                            title: Text(
-                              'Wajib menggunakan Identitas',
-                              style: TextStyle(fontSize: 12),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            leading: Icon(Icons.perm_contact_calendar_outlined),
-                          ),
-                        ),
-                        Divider(color: Colors.grey.shade300),
-                        // Wrap ListTile with constrained width for deposit
-                        SizedBox(
-                          width: double.maxFinite,
-                          child: ListTile(
-                            title: Text(
-                              'Wajib deposit ${CurrencyUtils().toRupiah(vm.product!.rentalTerms.depositAmount)}',
-                              style: TextStyle(fontSize: 12),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            leading: Iconify(Fa6Regular.money_bill_1),
-                          ),
-                        ),
-                        Gap(10),
-                        // Wrap additional notes in constrained box
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: double.infinity),
-                          child: Text(
-                            vm.product!.rentalTerms.additionalNotes,
-                            style: TextStyle(fontSize: 12),
-                            maxLines: null,
-                            overflow: TextOverflow.visible,
-                          ),
-                        ),
-                      ],
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        'Wajib menggunakan Identitas',
+                        style: TextStyle(fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      leading: Icon(Icons.perm_contact_calendar_outlined),
                     ),
-                  ),
+                    Divider(color: Colors.grey.shade300),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(
+                        'Wajib deposit ${CurrencyUtils().toRupiah(vm.product!.rentalTerms.depositAmount)}',
+                        style: TextStyle(fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      leading: Iconify(Fa6Regular.money_bill_1),
+                    ),
+                    Gap(10),
+                    // Wrap additional notes in constrained box
+                    Text(
+                        vm.product!.rentalTerms.additionalNotes,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                  ],
                 ),
               )
             else

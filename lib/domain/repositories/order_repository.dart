@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/data/model/payment_model.dart';
+import 'package:sewiee/data/model/user_model.dart';
 import 'package:sewiee/data/services/order_service.dart';
 import 'package:sewiee/domain/enum/order_status.dart';
 
@@ -88,18 +89,16 @@ class OrderRepository {
     required String orderId,
     required String receiptNumber,
     required String courierName,
-    required String courierCode,
   }) {
     return _service.submitReturnReceipt(
       orderId: orderId,
       receiptNumber: receiptNumber,
       courierName: courierName,
-      courierCode: courierCode,
     );
   }
 
-  Future<void> payPenalty({required String orderId}) {
-    return _service.payPenalty(orderId: orderId);
+  Future<Map<String,dynamic>> payPenalty({required OrderModel order, required UserModel user}) {
+    return _service.createPenaltyTransaction(order: order, userModel: user);
   }
 
   Future<void> updateRentDate({
@@ -121,6 +120,16 @@ class OrderRepository {
     return _service.updateDeliveryReceiptNumber(
       orderId: orderId,
       receiptNumber: receiptNumber,
+    );
+  }
+
+  Future<void> updateOnReturnDelivered({
+    required String orderId,
+    required DateTime receivedAt,
+  }) {
+    return _service.updateOnReturnDelivered(
+      orderId: orderId,
+      receivedAt: receivedAt,
     );
   }
 

@@ -87,17 +87,13 @@ class OrderViewmodel extends ChangeNotifier {
     required String orderId,
     required OrderStatus status,
   }) async {
-
-
     _showLoadingDialog();
     try {
-
       selectedOrderModel = await _orderRepository.updateOrderStatus(
         orderId: orderId,
         newStatus: status,
       );
       notifyListeners();
-
     } finally {
       _hideLoadingDialog();
     }
@@ -106,7 +102,6 @@ class OrderViewmodel extends ChangeNotifier {
   Future<void> updateDeliveredStatus() async {
     _showLoadingDialog();
     try {
-
       final startDate = DateTime.now();
 
       final endDate = OrderUtils.rentalEndDate(
@@ -124,7 +119,6 @@ class OrderViewmodel extends ChangeNotifier {
         endDate: endDate,
       );
       notifyListeners();
-
     } finally {
       _hideLoadingDialog();
     }
@@ -136,7 +130,6 @@ class OrderViewmodel extends ChangeNotifier {
 
   Future<OrderModel> confirmOrderReceived(OrderModel order) {
     return _runOrderMutation(() async {
-
       final startDate = DateTime.now();
 
       final endDate = OrderUtils.rentalEndDate(
@@ -161,23 +154,21 @@ class OrderViewmodel extends ChangeNotifier {
   }
 
   Future<OrderModel> submitReturnByExpedition({
-    required OrderModel order,
     required String receiptNumber,
+    required String courierName
   }) {
     return _runOrderMutation(() async {
-
       await _orderRepository.submitReturnReceipt(
-        orderId: order.id,
+        orderId: selectedOrderModel!.id,
         receiptNumber: receiptNumber,
-        courierCode: ,
-        courierName: ,
+        courierName: courierName,
       );
 
-      final updatedOrder = order.copyWith(
+      final updatedOrder = selectedOrderModel!.copyWith(
         status: OrderStatus.returnOnDelivery,
-        shipping: order.shipping.copyWith(
+        shipping: selectedOrderModel!.shipping.copyWith(
           returnTracking: (
-              order.shipping.returnTracking ?? const ReturnTracking()
+              selectedOrderModel!.shipping.returnTracking!
           ).copyWith(
             receiptNumber: receiptNumber,
             status: 'on_delivery',
@@ -195,7 +186,6 @@ class OrderViewmodel extends ChangeNotifier {
 
   Future<OrderModel> confirmReturnReceived(OrderModel order) {
     return _runOrderMutation(() async {
-
       final updatedOrder = await _orderRepository.updateOrderStatus(
         orderId: order.id,
         newStatus: OrderStatus.returned,
@@ -212,49 +202,32 @@ class OrderViewmodel extends ChangeNotifier {
 // PENALTY FLOW
 // =========================
 
-  Future<OrderModel> payDamagePenalty(OrderModel order) {
-    return _runOrderMutation(() async {
-
-      await _orderRepository.payPenalty(
-        orderId: order.id,
+  Future<Map<String,dynamic>> payDamagePenalty(OrderModel order) async {
+    isLoading = true;
+    notifyListeners();
+    try{
+      final response = await _orderRepository.payPenalty(
+          order: order,
+          user: userModel!
       );
 
-      final updatedOrder = await _orderRepository.updateOrderStatus(
-        orderId: order.id,
-        newStatus: OrderStatus.completed,
-      );
-
-      selectedOrderModel = updatedOrder;
-      notifyListeners();
-
-      return updatedOrder;
-    }, debugLabel: 'PAY DAMAGE PENALTY ERROR');
-  }
-
-  Future<void> payPenalty({
-    required String orderId,
-  }) async {
-    _showLoadingDialog();
-    try {
-
-      await _orderRepository.payPenalty(
-        orderId: orderId,
-      );
-
-    } catch(e){
+      return response;
+    } catch (e) {
       debugPrint(e.toString());
+      rethrow;
     } finally {
-
-      _hideLoadingDialog();
+      isLoading = false;
+      notifyListeners();
     }
+
   }
+
 
   Stream<List<OrderModel>> streamOrderByOwnerId() {
     return _orderRepository.streamOrderByOwnerId(userModel!.uid);
   }
 
-  Future<T> _runOrderMutation<T>(
-    Future<T> Function() action, {
+  Future<T> _runOrderMutation<T>(Future<T> Function() action, {
     required String debugLabel,
   }) async {
     _showLoadingDialog();
@@ -338,14 +311,16 @@ class OrderViewmodel extends ChangeNotifier {
     required DateTime endDate,
   }) async {
     return _runOrderMutation(
-      () => _orderRepository.updateRentDate(
-        orderId: orderId,
-        startDate: startDate,
-        endDate: endDate,
-      ),
+          () =>
+          _orderRepository.updateRentDate(
+            orderId: orderId,
+            startDate: startDate,
+            endDate: endDate,
+          ),
       debugLabel: 'UPDATE RENT DATE ERROR',
     );
   }
+
   // ===========================================================================
   // USER ORDER DETAIL FUNCTION
   // ===========================================================================
@@ -368,10 +343,81 @@ class OrderViewmodel extends ChangeNotifier {
     return _orderRepository.streamOrderByRenterId(userModel!.uid);
   }
 
-  Stream<OrderModel> streamOrder(){
+  Stream<OrderModel> streamOrder() {
     return _orderRepository.streamOrder(selectedOrderModel!.id);
   }
 
+  // Future<MidtransTransactionResponseModel?>
+  // createPenaltyTransaction({
+  //   required OrderModel order,
+  // }) async {
+  //   _showLoadingDialog();
+  //   try {
+  //
+  //     final penaltyAmount =
+  //         (order.rental.brokenFine ?? 0) +
+  //             (order.rental.lateFee ?? 0);
+  //
+  //     if (penaltyAmount <= 0) {
+  //       throw Exception('Tidak ada denda');
+  //     }
+  //
+  //     transactionModel = TransactionModel(
+  //
+  //       orderDocId: order.id,
+  //
+  //       orderNumber:
+  //       '${order.orderNumber}-PENALTY',
+  //
+  //       grossAmount: penaltyAmount,
+  //
+  //       paymentMethod: order.payment.paymentMethod,
+  //
+  //       customer: MidtransCustomer(
+  //         name: order.address.renter.contactName!,
+  //         email: userModel!.email,
+  //         phone: order.address.renter.contactPhoneNumber!,
+  //         shippingAddress: MidtransShippingAddress(
+  //           firstName: order.address.renter.contactName!,
+  //           fullAddress: order.address.renter.fullAddress!,
+  //         ),
+  //       ),
+  //
+  //       itemDetails: [
+  //
+  //         if ((order.rental.lateFee ?? 0) > 0)
+  //           MidtransItemDetail(
+  //             id: 'late_fee',
+  //             price: order.rental.lateFee,
+  //             quantity: 1,
+  //             name: 'Denda Keterlambatan',
+  //           ),
+  //
+  //         if ((order.rental.brokenFine ?? 0) > 0)
+  //           MidtransItemDetail(
+  //             id: 'broken_fine',
+  //             price: order.rental.brokenFine!,
+  //             quantity: 1,
+  //             name: 'Denda Kerusakan',
+  //           ),
+  //       ],
+  //     );
+  //
+  //     return await _orderRepository
+  //         .createTransaction(transactionModel!);
+  //
+  //   } catch (e, s) {
+  //
+  //     debugPrint(
+  //       'CREATE PENALTY TRANSACTION ERROR : $e',
+  //     );
+  //     debugPrintStack(stackTrace: s);
+  //
+  //     return null;
+  //   } finally{
+  //     _hideLoadingDialog();
+  //   }
+  // }
   // ===========================================================================
   // MERCHANT ORDER DETAIL FUNCTION
   // ===========================================================================
@@ -381,10 +427,11 @@ class OrderViewmodel extends ChangeNotifier {
     required OrderStatus newStatus,
   }) async {
     return _runOrderMutation(
-      () => _orderRepository.updateOrderStatus(
-        orderId: orderId,
-        newStatus: newStatus,
-      ),
+          () =>
+          _orderRepository.updateOrderStatus(
+            orderId: orderId,
+            newStatus: newStatus,
+          ),
       debugLabel: 'UPDATE STATUS ERROR',
     );
   }
@@ -394,10 +441,11 @@ class OrderViewmodel extends ChangeNotifier {
     required String receiptNumber,
   }) async {
     return _runOrderMutation(
-      () => _orderRepository.updateDeliveryReceiptNumber(
-        orderId: orderId,
-        receiptNumber: receiptNumber,
-      ),
+          () =>
+          _orderRepository.updateDeliveryReceiptNumber(
+            orderId: orderId,
+            receiptNumber: receiptNumber,
+          ),
       debugLabel: 'UPDATE RECEIPT ERROR',
     );
   }
@@ -433,12 +481,12 @@ class OrderViewmodel extends ChangeNotifier {
         );
 
         final tracking =
-            (order.shipping.deliveryTracking ?? const DeliveryTracking())
-                .copyWith(
-                  receiptNumber: trimmedReceipt,
-                  status: 'on_delivery',
-                  shippedAt: DateTime.now(),
-                );
+        (order.shipping.deliveryTracking ?? const DeliveryTracking())
+            .copyWith(
+          receiptNumber: trimmedReceipt,
+          status: 'on_delivery',
+          shippedAt: DateTime.now(),
+        );
 
         return order.copyWith(
           status: OrderStatus.onDelivery,
@@ -455,10 +503,8 @@ class OrderViewmodel extends ChangeNotifier {
     }, debugLabel: 'MARK ORDER PROCESSED ERROR');
   }
 
-  Future<OrderModel> markOrderInspection(
-    OrderModel order,
-    int? brokenFineAmount,
-  ) {
+  Future<OrderModel> markOrderInspection(OrderModel order,
+      int? brokenFineAmount,) {
     return _runOrderMutation(() async {
       OrderStatus status = (brokenFineAmount != null && brokenFineAmount > 0)
           ? OrderStatus.damageClaim
@@ -475,6 +521,27 @@ class OrderViewmodel extends ChangeNotifier {
         status: status,
       );
     }, debugLabel: 'ONINSPECTION ERROR');
+  }
+
+  Future<OrderModel> markReceived(OrderModel order) {
+    return _runOrderMutation(() async {
+
+      await _orderRepository.updateOnReturnDelivered(
+        orderId: order.id,
+        receivedAt: DateTime.now(),
+      );
+
+      return order.copyWith(
+        status: OrderStatus.onInspection,
+        shipping: order.shipping.copyWith(
+          returnTracking: order.shipping.returnTracking?.copyWith(
+            deliveredAt: DateTime.now(),
+            status: OrderStatus.onInspection.value,
+          ),
+        ),
+      );
+
+    }, debugLabel: 'ON MARK RECEIVED ERROR');
   }
 
   Future<OrderModel> markOrderOnRent(OrderModel order) {

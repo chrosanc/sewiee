@@ -6,7 +6,6 @@ import 'package:sewiee/presentation/widget/manage_order_detail/order_detail_prim
 Future<String?> showReceiptNumberSheet(
   BuildContext context, {
     required TextEditingController receiptNumberController,
-      required TextEditingController courierNameController,
   required OrderModel order,
 }) {
   final formKey = GlobalKey<FormState>();
@@ -209,7 +208,7 @@ Future<String?> showReceiptNumberSheet(
                               label: 'Konfirmasi & kirim',
                               onTap: () {
                                 if (formKey.currentState!.validate()) {
-                                  Navigator.pop(context, controller.text.trim());
+                                  Navigator.pop(context, receiptNumberController.text.trim());
                                 }
                               },
                             ),

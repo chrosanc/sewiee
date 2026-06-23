@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sewiee/app/utils/currency_utils.dart';
 import 'package:sewiee/app/utils/date_format.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/domain/enum/order_status.dart';
@@ -564,14 +565,14 @@ class RenterBannerConfig {
         );
 
       case OrderStatus.damageClaim:
-        return const RenterBannerConfig(
+        return RenterBannerConfig(
           bg: Color(0xFFFCEBEB),
           border: Color(0xFFF7C1C1),
           dot: Color(0xFFE24B4A),
           titleColor: Color(0xFFA32D2D),
           subtitleColor: Color(0xFFE24B4A),
           title: 'Klaim kerusakan',
-          subtitle: 'Ada laporan kerusakan pada barang sewaan',
+          subtitle: 'Denda : ${CurrencyUtils().toRupiah(orderData!.rental.brokenFine!)}',
         );
 
     /// =========================
