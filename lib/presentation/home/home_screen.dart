@@ -116,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: 0.68, // card width / card height — tune if needed
+                  childAspectRatio: 0.62, // 1:1 image + 98px body — keep slightly conservative
                 ),
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {

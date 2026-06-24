@@ -276,33 +276,44 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        'Wajib menggunakan Identitas',
-                        style: TextStyle(fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    // Wrap ListTile with constrained width for identity
+                    SizedBox(
+                      width: double.maxFinite,
+                      child: ListTile(
+                        title: Text(
+                          'Wajib menggunakan Identitas',
+                          style: TextStyle(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        leading: Icon(Icons.perm_contact_calendar_outlined),
                       ),
-                      leading: Icon(Icons.perm_contact_calendar_outlined),
                     ),
                     Divider(color: Colors.grey.shade300),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        'Wajib deposit ${CurrencyUtils().toRupiah(vm.product!.rentalTerms.depositAmount)}',
-                        style: TextStyle(fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    // Wrap ListTile with constrained width for deposit
+                    SizedBox(
+                      width: double.maxFinite,
+                      child: ListTile(
+                        title: Text(
+                          'Wajib deposit ${CurrencyUtils().toRupiah(vm.product!.rentalTerms.depositAmount)}',
+                          style: TextStyle(fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        leading: Iconify(Fa6Regular.money_bill_1),
                       ),
-                      leading: Iconify(Fa6Regular.money_bill_1),
                     ),
                     Gap(10),
                     // Wrap additional notes in constrained box
-                    Text(
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: double.infinity),
+                      child: Text(
                         vm.product!.rentalTerms.additionalNotes,
                         style: TextStyle(fontSize: 12),
+                        maxLines: null,
+                        overflow: TextOverflow.visible,
                       ),
+                    ),
                   ],
                 ),
               )
@@ -345,7 +356,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 10),
 
                   SizedBox(
-                    height: 200,
+                    height: 260,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
 
@@ -474,14 +485,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
           Gap(10),
 
-          // Wrap content in constrained box to prevent overflow
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: double.infinity),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: content,
-            ),
-          ),
+          content,
 
           const SizedBox(height: 10),
 

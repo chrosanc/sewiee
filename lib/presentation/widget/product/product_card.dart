@@ -53,8 +53,9 @@ class ProductCard extends StatelessWidget {
           // crossAxisAlignment fills the fixed grid cell width
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Image — fills remaining space above the fixed-height body ──
-            Expanded(
+            // ── Image — 1:1 square aspect ratio ──
+            AspectRatio(
+              aspectRatio: 1,
               child: Image.network(
                 imageUrl ?? _defaultImage,
                 width: double.infinity,
@@ -71,100 +72,91 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            // ── Body — fixed height so the grid cell never overflows ───────
-            SizedBox(
-              height: 98,
+            // ── Body — fills the remaining cell height ───────────────────
+            Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(9, 7, 9, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Top: name + price
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          productName ?? 'Product Name',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _kTextMain,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                child: SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Top: name + price
+                      Text(
+                        productName ?? 'Product Name',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: _kTextMain,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${CurrencyUtils().toRupiah(productPrice ?? 100000)} / ${durationType ?? 'hari'}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${CurrencyUtils().toRupiah(productPrice ?? 100000)} / ${durationType ?? 'hari'}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: _kAmber,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      // Bottom: category badge + store row
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: _kAmberLight,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          category ?? 'Kategori',
                           style: GoogleFonts.poppins(
-                            fontSize: 10,
+                            fontSize: 9,
+                            color: _kAmberText,
                             fontWeight: FontWeight.w500,
-                            color: _kAmber,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                    ),
-
-                    // Bottom: category badge + store row
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: _kAmberLight,
-                            borderRadius: BorderRadius.circular(4),
+                      ),
+                      const SizedBox(height: 5),
+                      const Divider(height: 1, thickness: 0.5, color: _kDivider),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Container(
+                            width: 16,
+                            height: 16,
+                            decoration: const BoxDecoration(
+                              color: _kAmber,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.storefront_rounded,
+                              size: 10,
+                              color: Colors.white,
+                            ),
                           ),
-                          child: Text(
-                            category ?? 'Kategori',
-                            style: GoogleFonts.poppins(
-                              fontSize: 9,
-                              color: _kAmberText,
-                              fontWeight: FontWeight.w500,
+                          const SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              storeName ?? 'Store',
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                color: _kTextMuted,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        const SizedBox(height: 5),
-                        const Divider(height: 1, thickness: 0.5, color: _kDivider),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Container(
-                              width: 16,
-                              height: 16,
-                              decoration: const BoxDecoration(
-                                color: _kAmber,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.storefront_rounded,
-                                size: 10,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 5),
-                            Expanded(
-                              child: Text(
-                                storeName ?? 'Store',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  color: _kTextMuted,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
