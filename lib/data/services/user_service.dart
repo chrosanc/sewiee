@@ -83,6 +83,16 @@ class UserService {
   }
 
   // =========================
+  // UPDATE FCM TOKEN
+  // =========================
+
+  Future<void> updateFcmToken(String uid, String token) async {
+    await _firestore.collection('users').doc(uid).update({
+      'fcm_token': token,
+    });
+  }
+
+  // =========================
   // CHECK USERNAME
   // =========================
 

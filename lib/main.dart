@@ -20,6 +20,7 @@ import 'package:sewiee/presentation/register/register_viewmodel.dart';
 import 'package:sewiee/presentation/splash/splash_screen.dart';
 import 'package:sewiee/presentation/widget/loading/dialog_manager.dart';
 import 'package:sewiee/presentation/widget/loading/loading_manager.dart';
+import 'package:sewiee/data/services/notification_service.dart';
 
 import 'presentation/order/checkout/checkout_viewmodel.dart';
 
@@ -29,6 +30,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService.init();
   runApp(const MyApp());
 }
 final serviceLocator = GetIt.instance;

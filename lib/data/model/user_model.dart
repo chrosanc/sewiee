@@ -47,6 +47,7 @@ class UserModel {
   // =========================
 
   final bool isVerified;
+  final String? fcmToken;
 
   UserModel({
     required this.uid,
@@ -75,6 +76,7 @@ class UserModel {
     this.storeRating = 0,
 
     this.isVerified = false,
+    this.fcmToken,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -112,6 +114,7 @@ class UserModel {
       (json['store_rating'] ?? 0).toDouble(),
 
       isVerified: json['is_verified'] ?? false,
+      fcmToken: json['fcm_token'],
     );
   }
 
@@ -146,6 +149,7 @@ class UserModel {
       "store_rating": storeRating,
 
       "is_verified": isVerified,
+      "fcm_token": fcmToken,
     };
   }
 }
