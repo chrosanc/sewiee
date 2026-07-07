@@ -224,6 +224,10 @@ class OrderViewmodel extends ChangeNotifier {
 
 
   Stream<List<OrderModel>> streamOrderByOwnerId() {
+    if (userModel == null) {
+      // User not loaded yet; return empty stream to avoid null error
+      return const Stream.empty();
+    }
     return _orderRepository.streamOrderByOwnerId(userModel!.uid);
   }
 
