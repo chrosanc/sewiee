@@ -20,6 +20,48 @@ class OrderService {
   final midtransUrl = 'https://app.sandbox.midtrans.com/snap/v1/transactions';
   final midtransKey = dotenv.get('MIDTRANS_SERVER_API_KEY');
 
+  // =========================
+  // CREATE ORDER WITH STOCK RESERVATION (ATOMIC TRANSACTION)
+  // =========================
+
+  Future<OrderModel?> createOrderWithStockCheck({
+    required String orderId,
+    required String productId,
+    required Map<String, dynamic> orderData,
+  }) async {
+    try {
+      // Gunakan transaction untuk mengurangi stok dan membuat order secara atomik
+      await _firestore.runTransaction((transaction) async {
+        // 1. Ambil data produk
+        final productRef = _firestore.collection('products').doc(productId);
+        final productSnapshot = await transaction.get(productRef);
+
+        if (!productSnapshot.exists) {
+          throw Exception('Produk tidak ditemukan');
+        }
+
+        final currentStock = productSnapshot.data()?['stock'] ?? 0;
+
+        // 2. Cek stok tersedia
+        if (currentStock <= 0) {
+          throw Exception('Stok produk habis! Silahkan pilih produk lain.');
+        }
+
+        // 3. Kurangi stok produk
+        transaction.update(productRef, {'stock': currentStock - 1});
+
+        // 4. Buat dokumen order
+        transaction.set(_firestore.collection('order').doc(orderId), orderData);
+      });
+
+      debugPrint('Order berhasil dibuat dengan stok ter-reservasi');
+      return null; // Transaction sudah selesai, tidak perlu return order model lagi
+    } catch (e) {
+      debugPrint('Error saat create order: $e');
+      rethrow;
+    }
+  }
+
   Future<OrderModel> updateOrderStatus({
     required String orderId,
     required OrderStatus newStatus,

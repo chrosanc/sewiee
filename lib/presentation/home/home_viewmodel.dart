@@ -51,7 +51,7 @@ class HomeViewModel extends ChangeNotifier {
     _showLoadingDialog();
     try {
       products = await productService.getProducts();
-      activeProducts = products.where((product) => product.active).toList();
+      activeProducts = products.where((product) => product.active && product.stock > 0).toList();
       notifyListeners();
 
     } catch (e) {

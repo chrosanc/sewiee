@@ -5,6 +5,7 @@ import { sendPushNotification } from "../../services/notification_service";
 const db = admin.firestore();
 const REGION = "asia-southeast2"; // Jakarta
 const EXCLUDED_STATUS = "waiting_payment";
+const CANCEL_STATUSES = ["cancelled", "payment_expired", "payment_failed"];
 
 export const onOrderCreated = onDocumentCreated(
     { document: "orders/{orderId}", region: REGION },
@@ -15,8 +16,18 @@ export const onOrderCreated = onDocumentCreated(
         const status = order?.status;
         const orderNumber = order?.order_number;
         const productName = order?.product_snapshot?.name || "Produk";
+        const productId = order?.product_snapshot?.id;
 
         if (!ownerId || !renterId) return;
+
+        // =========================
+        // STOCK: Decrement on order creation (reserve stock)
+        // =========================
+        if (productId) {
+            await db.doc(`products/${productId}`).update({
+                stock: admin.firestore.FieldValue.increment(-1),
+            });
+        }
 
         // Get tokens
         const [ownerDoc, renterDoc] = await Promise.all([
@@ -59,6 +70,7 @@ export const onOrderStatusUpdated = onDocumentUpdated(
 
         const ownerId = after?.owner_id;
         const renterId = after?.renter_id;
+        const productId = after?.product_snapshot?.id;
         const prevStatus = before?.status;
         const newStatus = after?.status;
         const orderNumber = after?.order_number;
@@ -151,6 +163,18 @@ export const onOrderStatusUpdated = onDocumentUpdated(
         }
         await Promise.all(promises);
 
+        // =========================
+        // STOCK: Restore stock on cancellation/payment failure OR completed/returned
+        // =========================
+        if (productId && (CANCEL_STATUSES.includes(newStatus) || newStatus === "completed" || newStatus === "returned")) {
+            await db.doc(`products/${productId}`).update({
+                stock: admin.firestore.FieldValue.increment(1),
+            });
+        }
+
+        // =========================
+        // TRANSACTION COUNT
+        // =========================
         if (prevStatus === EXCLUDED_STATUS && newStatus !== EXCLUDED_STATUS) {
             await db.doc(`users/${ownerId}`).update({
                 totalTransactions: admin.firestore.FieldValue.increment(1),

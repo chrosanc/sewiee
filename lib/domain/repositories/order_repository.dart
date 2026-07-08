@@ -17,6 +17,22 @@ class OrderRepository {
     }
   }
 
+  Future<void> createOrderWithStockCheck({
+    required String orderId,
+    required String productId,
+    required Map<String, dynamic> orderData,
+  }) async {
+    try {
+      await _service.createOrderWithStockCheck(
+        orderId: orderId,
+        productId: productId,
+        orderData: orderData,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<String> generateOrderNumber() async {
     try {
       return await _service.generateOrderNumber();

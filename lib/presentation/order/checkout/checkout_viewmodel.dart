@@ -463,11 +463,31 @@ class CheckoutViewmodel extends ChangeNotifier {
       );
 
       // =========================
-      // SAVE TO FIRESTORE
+      // SAVE TO FIRESTORE WITH STOCK TRANSACTION
       // =========================
-      await _orderRepository.createOrder(orderModel!);
-      notifyListeners();
-      return orderModel;
+      try {
+        // Gunakan transaksi untuk mengurangi stok dan membuat order secara atomik
+        await _orderRepository.createOrderWithStockCheck(
+          orderId: orderId,
+          productId: productModel!.id,
+          orderData: orderModel!.toJson(),
+        );
+
+        debugPrint('Order berhasil dibuat dengan stok ter-reservasi');
+        notifyListeners();
+        return orderModel;
+      } catch (e) {
+        debugPrint('Error saat create order: $e');
+        
+        // Cek apakah error karena stok habis
+        if (e.toString().toLowerCase().contains('stok produk habis')) {
+          // Tampilkan pesan error ke user (asumsi ada cara untuk menampilkan snackbar/dialog)
+          // serviceLocator<DialogManager>().showErrorSnackBar('Stok produk habis! Silahkan pilih produk lain.');
+          throw Exception('Stok produk habis! Silahkan pilih produk lain.');
+        } else {
+          throw Exception('Gagal membuat pesanan. Silakan coba lagi.');
+        }
+      }
     } catch (e) {
       debugPrint(e.toString());
       return null;
