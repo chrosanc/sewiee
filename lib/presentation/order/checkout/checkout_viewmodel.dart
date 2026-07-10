@@ -27,7 +27,6 @@ class CheckoutViewmodel extends ChangeNotifier {
 
   void _hideLoadingDialog() => _loadingManager.hideLoading();
 
-
   // =========================
   // USER VARIABLE
   // =========================
@@ -253,10 +252,9 @@ class CheckoutViewmodel extends ChangeNotifier {
   // PAYMENT FUNCTION
   // =========================
 
-  Stream<OrderModel> streamOrder(){
+  Stream<OrderModel> streamOrder() {
     return _orderRepository.streamOrder(orderModel!.id);
   }
-
 
   Future<void> getPaymentMethods() async {
     _showLoadingDialog();
@@ -276,7 +274,8 @@ class CheckoutViewmodel extends ChangeNotifier {
     final int depositAmount = productModel?.rentalTerms.depositAmount ?? 0;
 
     // Ongkir hanya masuk jika metode pengiriman adalah ekspedisi DAN sudah memilih ekspedisi
-    final int shippingPrice = selectedDeliveryMethod == 'expedition' && selectedCourier != null
+    final int shippingPrice =
+        selectedDeliveryMethod == 'expedition' && selectedCourier != null
         ? selectedCourier!.price
         : 0;
 
@@ -352,7 +351,6 @@ class CheckoutViewmodel extends ChangeNotifier {
 
       final int totalUserPayment = countTotalPrice();
 
-
       // =========================
       // ORDER MODEL
       // =========================
@@ -397,7 +395,6 @@ class CheckoutViewmodel extends ChangeNotifier {
 
         // RENTAL
         rental: RentalDetail(
-
           totalDuration: rentDurationCount,
 
           lateFee: 0,
@@ -436,7 +433,9 @@ class CheckoutViewmodel extends ChangeNotifier {
             productPrice: productModel!.price * rentDurationCount,
 
             // Ongkir hanya masuk jika metode pengiriman adalah ekspedisi DAN sudah memilih ekspedisi
-            deliveryFee: selectedDeliveryMethod == 'expedition' && selectedCourier != null
+            deliveryFee:
+                selectedDeliveryMethod == 'expedition' &&
+                    selectedCourier != null
                 ? selectedCourier!.price
                 : 0,
 
@@ -447,7 +446,6 @@ class CheckoutViewmodel extends ChangeNotifier {
             serviceFee: serviceCost,
 
             totalPayment: totalUserPayment,
-
           ),
 
           expiredAt: DateTime.now().add(Duration(days: 1)),
@@ -478,7 +476,7 @@ class CheckoutViewmodel extends ChangeNotifier {
         return orderModel;
       } catch (e) {
         debugPrint('Error saat create order: $e');
-        
+
         // Cek apakah error karena stok habis
         if (e.toString().toLowerCase().contains('stok produk habis')) {
           // Tampilkan pesan error ke user (asumsi ada cara untuk menampilkan snackbar/dialog)
@@ -544,7 +542,6 @@ class CheckoutViewmodel extends ChangeNotifier {
 
             name: productModel!.productName,
           ),
-
         ],
       );
 
@@ -552,13 +549,12 @@ class CheckoutViewmodel extends ChangeNotifier {
       // CREATE TRANSACTION
       // =========================
 
-      return midtransTransactionResponseModel = await _orderRepository.createTransaction(transactionModel!);
-
+      return midtransTransactionResponseModel = await _orderRepository
+          .createTransaction(transactionModel!);
     } catch (e) {
       debugPrint('CREATE MIDTRANS ERROR : $e');
       return null;
-    } finally {
-    }
+    } finally {}
   }
 
   // =========================

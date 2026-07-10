@@ -107,17 +107,19 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
               final isEdit = widget.addressId != null;
               final result = isEdit
                   ? await vm.updateExistingAddress(
-                contactName: contactNameController.text.trim(),
-                contactPhoneNumber: contactPhoneNumberController.text.trim(),
-                label: labelController.text.trim(),
-                courierMessage: courierMessageController.text.trim(),
-              )
+                      contactName: contactNameController.text.trim(),
+                      contactPhoneNumber: contactPhoneNumberController.text
+                          .trim(),
+                      label: labelController.text.trim(),
+                      courierMessage: courierMessageController.text.trim(),
+                    )
                   : await vm.createAddressToFirestore(
-                contactName: contactNameController.text.trim(),
-                contactPhoneNumber: contactPhoneNumberController.text.trim(),
-                label: labelController.text.trim(),
-                courierMessage: courierMessageController.text.trim(),
-              );
+                      contactName: contactNameController.text.trim(),
+                      contactPhoneNumber: contactPhoneNumberController.text
+                          .trim(),
+                      label: labelController.text.trim(),
+                      courierMessage: courierMessageController.text.trim(),
+                    );
 
               if (!context.mounted) return;
 
@@ -133,9 +135,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
               } else {
                 Toast().showToast(
                   context,
-                  isEdit
-                      ? 'Gagal mengubah alamat'
-                      : 'Gagal menambahkan alamat',
+                  isEdit ? 'Gagal mengubah alamat' : 'Gagal menambahkan alamat',
                 );
               }
             },
@@ -171,7 +171,7 @@ class _EditAddressScreenState extends State<EditAddressScreen> {
                             Row(
                               children: [
                                 Iconify(Fa6Solid.location_dot, size: 20),
-                                Gap(20),
+                                Gap(10),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [

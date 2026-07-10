@@ -29,7 +29,7 @@ class AddressViewmodel extends ChangeNotifier {
   /// =========================
   /// PLACES VARIABLE
   /// =========================
-  String? placesAPI;
+  String? placesAPI = dotenv.get("GOOGLE_MAPS_API_KEY");
 
   /// =========================
   /// ADDRESS VARIABLE
@@ -131,7 +131,6 @@ class AddressViewmodel extends ChangeNotifier {
     selectedLatLng = latLng;
     await getAddressFromLatLng(latLng.latitude, latLng.longitude);
     notifyListeners();
-
   }
 
   /// =========================
@@ -159,7 +158,7 @@ class AddressViewmodel extends ChangeNotifier {
   }
 
   Future<void> getAddressFromLatLng(double latitude, double longitude) async {
-   _showLoadingDialog();
+    _showLoadingDialog();
 
     try {
       final placemarks = await placemarkFromCoordinates(latitude, longitude);
@@ -190,8 +189,7 @@ class AddressViewmodel extends ChangeNotifier {
           .where((e) => e.isNotEmpty)
           .join(', ');
 
-
-      if(addressModel?.id != null){
+      if (addressModel?.id != null) {
         addressModel = addressModel!.copyWith(
           latitude: latitude,
           longitude: longitude,
@@ -217,7 +215,6 @@ class AddressViewmodel extends ChangeNotifier {
         );
       }
       notifyListeners();
-
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -290,9 +287,9 @@ class AddressViewmodel extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteUserAddress(BuildContext context, String addressId) async{
+  Future<void> deleteUserAddress(BuildContext context, String addressId) async {
     _showLoadingDialog();
-    try{
+    try {
       await addressRepository.deleteUserAddress(userModel!.uid, addressId);
       Navigator.pop(context);
       Toast().showToast(context, 'Berhasil Menghapus Alamat');

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sewiee/app/utils/toast.dart';
@@ -362,7 +361,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       ),
                                       Divider(color: Colors.grey.shade300),
                                       CheckboxListWidget(
-                                        title: 'Diantar Penjual',
+                                        title: 'Diambil Penjual',
                                         value: vm.selectedDeliveryMethods
                                             .contains('seller_delivery'),
                                         onChanged: (value) {
@@ -499,7 +498,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       ),
                                       Divider(color: Colors.grey.shade300),
                                       CheckboxListWidget(
-                                        title: 'Diantar Penjual',
+                                        title: 'Diambil Penjual',
                                         value: vm.selectedReturnMethods
                                             .contains('seller_pickup'),
                                         onChanged: (value) {

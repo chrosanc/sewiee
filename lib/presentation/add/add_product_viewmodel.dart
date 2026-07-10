@@ -126,7 +126,7 @@ class AddProductViewmodel extends ChangeNotifier {
     }
 
     if (selectedDeliveryMethods.contains('seller_delivery')) {
-      labels.add('Diantar Penjual');
+      labels.add('Diambil Penjual');
     }
 
     if (selectedDeliveryMethods.contains('expedition')) {
@@ -329,7 +329,7 @@ class AddProductViewmodel extends ChangeNotifier {
 
     required String additionalNotes,
     required String expeditionWeights,
-    required Set<String> expeditions
+    required Set<String> expeditions,
   }) {
     if (productName.trim().isEmpty) {
       return 'Nama produk wajib diisi';
@@ -376,7 +376,6 @@ class AddProductViewmodel extends ChangeNotifier {
     }
 
     if (selectedDeliveryMethods.contains('expedition')) {
-
       if (expeditionWeights.trim().isEmpty) {
         return 'Berat barang wajib diisi';
       }
@@ -385,7 +384,6 @@ class AddProductViewmodel extends ChangeNotifier {
         return 'Kurir ekspedisi wajib dipilih';
       }
     }
-
 
     return null;
   }
@@ -436,7 +434,6 @@ class AddProductViewmodel extends ChangeNotifier {
     required TextEditingController additionalNotesController,
 
     required TextEditingController expeditionWeightController,
-
   }) async {
     final validationMessage = validateForm(
       productName: productNameController.text,
@@ -545,7 +542,6 @@ class AddProductViewmodel extends ChangeNotifier {
 
           expeditionReturn: ExpeditionReturnOption(
             enabled: selectedReturnMethods.contains('expedition_return'),
-
           ),
         ),
 
