@@ -13,39 +13,39 @@ import 'package:sewiee/presentation/merchant/manage/manage_product/manage_produc
 import 'package:sewiee/presentation/order/order_viewmodel.dart';
 
 // ── Color constants ────────────────────────────────────────────────────────────
-const _bg         = Color(0xFFF5F5F0);
-const _surface    = Color(0xFFFFFFFF);
-const _border     = Color(0xFFE8E6E0);
-const _divider    = Color(0xFFEFEDE8);
-const _textPrimary   = Color(0xFF1A1A18);
+const _bg = Color(0xFFF5F5F0);
+const _surface = Color(0xFFFFFFFF);
+const _border = Color(0xFFE8E6E0);
+const _divider = Color(0xFFEFEDE8);
+const _textPrimary = Color(0xFF1A1A18);
 const _textSecondary = Color(0xFF888780);
 
 // Amber
-const _amberBg     = Color(0xFFFAEEDA);
-const _amberMid    = Color(0xFFFAC775);
+const _amberBg = Color(0xFFFAEEDA);
+const _amberMid = Color(0xFFFAC775);
 const _amberStrong = Color(0xFFBA7517);
-const _amberDark   = Color(0xFF854F0B);
+const _amberDark = Color(0xFF854F0B);
 const _amberDeeper = Color(0xFF633806);
-const _amberDarkest= Color(0xFF412402);
+const _amberDarkest = Color(0xFF412402);
 
 // Teal
-const _tealBg     = Color(0xFFE1F5EE);
+const _tealBg = Color(0xFFE1F5EE);
 const _tealStrong = Color(0xFF0F6E56);
 
 // Blue
-const _blueBg     = Color(0xFFE6F1FB);
+const _blueBg = Color(0xFFE6F1FB);
 const _blueStrong = Color(0xFF185FA5);
 
 // Coral
-const _coralBg     = Color(0xFFFAECE7);
+const _coralBg = Color(0xFFFAECE7);
 const _coralStrong = Color(0xFF993C1D);
 
 // Green
-const _greenBg     = Color(0xFFEAF3DE);
+const _greenBg = Color(0xFFEAF3DE);
 const _greenStrong = Color(0xFF3B6D11);
 
 // Gray
-const _grayBg     = Color(0xFFF1EFE8);
+const _grayBg = Color(0xFFF1EFE8);
 const _grayStrong = Color(0xFF5F5E5A);
 
 class ManageMerchantScreen extends StatefulWidget {
@@ -59,9 +59,7 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-
-    });
+    Future.microtask(() {});
   }
 
   @override
@@ -121,7 +119,8 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
                   // ── Store Banner ─────────────────────────────────────────
                   _StoreBanner(
                     storeName: vm.userModel?.storeName ?? 'Nama Toko',
-                    storeHandle: vm.userModel?.storeUsername ?? '@username_toko',
+                    storeHandle:
+                        vm.userModel?.storeUsername ?? '@username_toko',
                   ),
                   const SizedBox(height: 10),
 
@@ -147,7 +146,9 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
                     onAction: () async {
                       final ProductModel? result = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => ManageProductScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => ManageProductScreen(),
+                        ),
                       );
                       if (result is ProductModel) {
                         vm.getProductByCurrentUser(context);
@@ -156,28 +157,28 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
                     child: vm.listProduct.isEmpty
                         ? const _EmptyState(message: 'Belum ada produk')
                         : ListView.separated(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: vm.listProduct.length.clamp(0, 5),
-                      separatorBuilder: (_, __) => const Divider(
-                        height: 0.5,
-                        color: _divider,
-                        indent: 14,
-                        endIndent: 14,
-                      ),
-                      itemBuilder: (context, index) {
-                        final item = vm.listProduct[index];
-                        return _ProductRow(
-                          image: item.images.first,
-                          name: item.productName,
-                          category: item.categoryName,
-                          price: item.price,
-                          active: item.active,
-                          stock: item.stock,
-                          durationType: item.durationType,
-                        );
-                      },
-                    ),
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: vm.listProduct.length.clamp(0, 5),
+                            separatorBuilder: (_, __) => const Divider(
+                              height: 0.5,
+                              color: _divider,
+                              indent: 14,
+                              endIndent: 14,
+                            ),
+                            itemBuilder: (context, index) {
+                              final item = vm.listProduct[index];
+                              return _ProductRow(
+                                image: item.images.first,
+                                name: item.productName,
+                                category: item.categoryName,
+                                price: item.price,
+                                active: item.active,
+                                stock: item.stock,
+                                durationType: item.durationType,
+                              );
+                            },
+                          ),
                   ),
                   const SizedBox(height: 10),
 
@@ -190,12 +191,16 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
                     title: 'Pesanan Toko',
                     actionLabel: 'Semua',
                     onAction: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => ManageOrderScreen()));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => ManageOrderScreen()),
+                      );
                     },
                     child: StreamBuilder<List<OrderModel>>(
                       stream: orderVm.streamOrderByOwnerId(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 24),
                             child: Center(
@@ -214,7 +219,9 @@ class _ManageMerchantScreenState extends State<ManageMerchantScreen> {
                         final orders = (snapshot.data ?? []).take(5).toList();
 
                         if (orders.isEmpty) {
-                          return const _EmptyState(message: 'Belum ada Pesanan');
+                          return const _EmptyState(
+                            message: 'Belum ada Pesanan',
+                          );
                         }
 
                         return ListView.separated(
@@ -307,7 +314,7 @@ class _OrderRow extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 5),
 
           // Harga + status
           Column(
@@ -338,15 +345,20 @@ class _OrderStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (Color bg, Color fg, String label) = switch (status) {
-      OrderStatus.waitingPayment   => (_amberBg,  _amberDark,   'Belum Bayar'),
-      OrderStatus.onDelivery       => (_blueBg,   _blueStrong,  'Dikirim'),
-      OrderStatus.waitingPickup    => (_tealBg,   _tealStrong,  'Ambil'),
-      OrderStatus.onRent           => (_tealBg,   _tealStrong,  'Disewa'),
-      OrderStatus.returnOnDelivery => (_blueBg,   _blueStrong,  'Kembali'),
-      OrderStatus.onInspection     => (_amberBg,  _amberDark,   'Inspeksi'),
-      OrderStatus.damageClaim      => (_coralBg,  _coralStrong, 'Klaim'),
-      OrderStatus.completed        => (_greenBg,  _greenStrong, 'Selesai'),
-      _                            => (_grayBg,   _grayStrong,  status.value),
+      OrderStatus.waitingConfirmation => (
+        _amberBg,
+        _amberDark,
+        "Butuh Konfirmasi",
+      ),
+      OrderStatus.waitingPayment => (_amberBg, _amberDark, 'Belum Bayar'),
+      OrderStatus.onDelivery => (_blueBg, _blueStrong, 'Dikirim'),
+      OrderStatus.waitingPickup => (_tealBg, _tealStrong, 'Ambil'),
+      OrderStatus.onRent => (_tealBg, _tealStrong, 'Disewa'),
+      OrderStatus.returnOnDelivery => (_blueBg, _blueStrong, 'Kembali'),
+      OrderStatus.onInspection => (_amberBg, _amberDark, 'Inspeksi'),
+      OrderStatus.damageClaim => (_coralBg, _coralStrong, 'Klaim'),
+      OrderStatus.completed => (_greenBg, _greenStrong, 'Selesai'),
+      _ => (_grayBg, _grayStrong, status.value),
     };
 
     return Container(
@@ -564,11 +576,15 @@ class _StatsRow extends StatelessWidget {
     return IntrinsicHeight(
       child: Row(
         children: const [
-          _StatItem(label: 'Keuntungan', value: 'Rp 0rb', valueColor: _amberStrong),
+          _StatItem(
+            label: 'Keuntungan',
+            value: 'Rp 0rb',
+            valueColor: _amberStrong,
+          ),
           VerticalDivider(width: 0.5, color: _divider),
-          _StatItem(label: 'Produk',     value: '0',        valueColor: _tealStrong),
+          _StatItem(label: 'Produk', value: '0', valueColor: _tealStrong),
           VerticalDivider(width: 0.5, color: _divider),
-          _StatItem(label: 'Pesanan',    value: '0',         valueColor: _blueStrong),
+          _StatItem(label: 'Pesanan', value: '0', valueColor: _blueStrong),
         ],
       ),
     );
@@ -579,7 +595,11 @@ class _StatItem extends StatelessWidget {
   final String label;
   final String value;
   final Color valueColor;
-  const _StatItem({required this.label, required this.value, required this.valueColor});
+  const _StatItem({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -624,7 +644,8 @@ class _ProductRow extends StatelessWidget {
     required this.price,
     required this.active,
     required this.stock,
-    required this.durationType, required this.image,
+    required this.durationType,
+    required this.image,
   });
 
   @override
@@ -641,10 +662,8 @@ class _ProductRow extends StatelessWidget {
                 child: Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F4F0),
-                  ),
-                  child: Image.network(image, fit: BoxFit.cover,)
+                  decoration: BoxDecoration(color: const Color(0xFFF5F4F0)),
+                  child: Image.network(image, fit: BoxFit.cover),
                 ),
               ),
               Gap(10),
@@ -695,7 +714,7 @@ class _ProductRow extends StatelessWidget {
 
   static String _fmt(int p) {
     if (p >= 1000000) return '${(p / 1000000).toStringAsFixed(1)}jt';
-    if (p >= 1000)    return '${(p / 1000).toStringAsFixed(0)}rb';
+    if (p >= 1000) return '${(p / 1000).toStringAsFixed(0)}rb';
     return p.toString();
   }
 }
@@ -712,12 +731,12 @@ class _StatusBadge extends StatelessWidget {
     final String label;
 
     if (!active || stock == 0) {
-      bg    = _amberBg;
-      fg    = _amberDark;
+      bg = _amberBg;
+      fg = _amberDark;
       label = stock == 0 ? 'Habis' : 'Nonaktif';
     } else {
-      bg    = _greenBg;
-      fg    = _greenStrong;
+      bg = _greenBg;
+      fg = _greenStrong;
       label = 'Aktif';
     }
 
@@ -746,7 +765,11 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 24),
       child: Column(
         children: [
-          const Icon(Icons.inventory_2_outlined, size: 28, color: Color(0xFFD3D1C7)),
+          const Icon(
+            Icons.inventory_2_outlined,
+            size: 28,
+            color: Color(0xFFD3D1C7),
+          ),
           const SizedBox(height: 8),
           Text(
             message,

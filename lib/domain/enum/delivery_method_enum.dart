@@ -4,13 +4,13 @@ enum DeliveryMethod { renterPickup, merchantDelivery, expedition }
 
 extension DeliveryMethodX on DeliveryMethod {
   String get value {
-    switch (this){
+    switch (this) {
       case DeliveryMethod.renterPickup:
         return 'pickup';
       case DeliveryMethod.merchantDelivery:
         return 'seller_delivery';
       case DeliveryMethod.expedition:
-        return 'expedition_return';
+        return 'expedition';
     }
   }
 
@@ -69,17 +69,16 @@ extension DeliveryMethodX on DeliveryMethod {
     }
   }
 
-  static DeliveryMethod fromString(String value){
-    switch (value){
+  static DeliveryMethod fromString(String value) {
+    switch (value) {
       case 'pickup':
         return DeliveryMethod.renterPickup;
-      case 'seller_delivery' :
+      case 'seller_delivery':
         return DeliveryMethod.merchantDelivery;
-      case 'expedition_return' :
+      case 'expedition':
         return DeliveryMethod.expedition;
       default:
         return DeliveryMethod.renterPickup;
     }
-
   }
 }

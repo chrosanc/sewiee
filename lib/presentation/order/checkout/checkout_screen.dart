@@ -410,7 +410,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       onTap: () {
                         AppBottomSheet.show(
                           context: context,
-                          title: 'Metode Pengiriman',
+                          title: 'Metode Pengembalian',
                           child: Column(
                             children: [
                               StatefulBuilder(
