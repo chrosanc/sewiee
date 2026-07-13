@@ -8,8 +8,7 @@ import 'package:sewiee/app/theme.dart';
 import 'package:sewiee/app/utils/currency_utils.dart';
 import 'package:sewiee/app/utils/toast.dart';
 import 'package:sewiee/presentation/home/home_viewmodel.dart';
-import 'package:sewiee/presentation/order/checkout/checkout_screen.dart';
-import 'package:sewiee/presentation/order/checkout/checkout_viewmodel.dart';
+import 'package:sewiee/presentation/order/checkout/checkout_screen_non_mvvm.dart';
 import 'package:sewiee/presentation/products/product_viewmodel.dart';
 import 'package:sewiee/presentation/widget/bottomsheet/bottom_sheet_widget.dart';
 import 'package:sewiee/presentation/widget/button_widget.dart';
@@ -50,15 +49,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final vm = Provider.of<ProductViewmodel>(context);
 
     final vmHome = Provider.of<HomeViewModel>(context);
-    final vmCheckout = Provider.of<CheckoutViewmodel>(context);
-
-
     final product = vm.product;
-    if(product == null){
+    if (product == null) {
       return LoadingWidget();
     }
     final randomProducts =
-        vmHome.products.where((e) => e.id != product.id && e.active == true).toList()..shuffle();
+        vmHome.products
+            .where((e) => e.id != product.id && e.active == true)
+            .toList()
+          ..shuffle();
 
     return Scaffold(
       appBar: AppBar(
@@ -75,10 +74,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             isLoading: false,
             onPressed: () {
               if (vm.product != null) {
-                vmCheckout.setSelectedProduct(vm.product!);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CheckoutScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const CheckoutScreenNonMvvm(),
+                    settings: RouteSettings(arguments: vm.product!),
+                  ),
                 );
               } else {
                 Toast().showToast(context, 'Produk tidak tersedia');
@@ -175,7 +176,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                   // Wrap category in constrained box to prevent overflow
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: double.infinity),
+                    constraints: const BoxConstraints(
+                      maxWidth: double.infinity,
+                    ),
                     child: Text(
                       product.categoryName,
                       style: TextStyle(
@@ -306,7 +309,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Gap(10),
                     // Wrap additional notes in constrained box
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: double.infinity),
+                      constraints: const BoxConstraints(
+                        maxWidth: double.infinity,
+                      ),
                       child: Text(
                         vm.product!.rentalTerms.additionalNotes,
                         style: TextStyle(fontSize: 12),
@@ -386,13 +391,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             imageUrl: anotherProduct.images.first,
 
                             onTap: () {
-                              context.read<ProductViewmodel>().getDetailedProduct(context, anotherProduct.id);
+                              context
+                                  .read<ProductViewmodel>()
+                                  .getDetailedProduct(
+                                    context,
+                                    anotherProduct.id,
+                                  );
                               Navigator.pushReplacement(
                                 context,
 
                                 MaterialPageRoute(
-                                  builder: (context) => ProductDetailScreen(
-                                  ),
+                                  builder: (context) => ProductDetailScreen(),
                                 ),
                               );
                             },
