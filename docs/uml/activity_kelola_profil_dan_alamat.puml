@@ -1,0 +1,82 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam activityFontSize 13
+skinparam activityBorderColor #333333
+skinparam activityBackgroundColor #FFFFFF
+skinparam activityDiamondBackgroundColor #FFFFFF
+skinparam ArrowColor #333333
+skinparam roundcorner 18
+skinparam defaultTextAlignment center
+skinparam swimlaneBorderColor #333333
+skinparam swimlaneTitleFontStyle bold
+skinparam swimlaneTitleFontSize 14
+skinparam nodesep 35
+skinparam ranksep 45
+
+|User|
+start
+:Memilih menu Akun;
+
+|Sistem|
+:Menampilkan halaman Akun
+beserta data profil;
+
+|User|
+if (Menu dipilih?) then (Ubah Profil)
+  :Menekan Ubah Profil;
+
+  |Sistem|
+  :Menampilkan form profil;
+
+  |User|
+  :Mengubah nama, username,
+dan bio;
+  :Menekan Simpan;
+
+  |Sistem|
+  :Memeriksa kelengkapan form;
+  if (Form valid?) then (Ya)
+    :Memperbarui profil pengguna
+di Cloud Firestore;
+    :Menampilkan profil terbaru;
+  else (Tidak)
+    :Menampilkan pesan validasi;
+  endif
+
+else (Daftar Alamat)
+  :Menekan Daftar Alamat;
+
+  |Sistem|
+  :Menampilkan daftar alamat;
+
+  |User|
+  if (Aksi alamat?) then (Tambah/Ubah)
+    :Mengisi atau mengubah
+alamat;
+    :Menekan Simpan;
+
+    |Sistem|
+    :Menyimpan alamat
+di Cloud Firestore;
+    :Menampilkan daftar alamat terbaru;
+  elseif (Hapus) then (Hapus)
+    :Mengonfirmasi hapus alamat;
+
+    |Sistem|
+    :Menghapus alamat
+dari Cloud Firestore;
+    :Menampilkan daftar alamat terbaru;
+  else (Pilih)
+    :Memilih alamat;
+
+    |Sistem|
+    :Mengembalikan alamat terpilih;
+  endif
+endif
+
+|Sistem|
+stop
+@enduml

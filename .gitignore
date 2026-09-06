@@ -12,6 +12,14 @@
 .swiftpm/
 migrate_working_dir/
 
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+google-services.json
+firebase_options.dart
+android/local.properties
+
 # IntelliJ related
 *.iml
 *.ipr

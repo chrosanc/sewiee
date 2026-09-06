@@ -8,14 +8,22 @@ import 'package:sewiee/presentation/login/login_screen.dart';
 import 'package:sewiee/presentation/widget/loading/loading_manager.dart';
 
 class AccountViewmodel extends ChangeNotifier {
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseAuth auth;
   UserModel? userModel;
-  final UserRepository userRepository = UserRepository();
+  final UserRepository userRepository;
 
   /// =========================
   /// LOADING VARIABLE
   /// =========================
-  final LoadingManager _loadingManager = serviceLocator<LoadingManager>();
+  final LoadingManager _loadingManager;
+
+  AccountViewmodel({
+    FirebaseAuth? auth,
+    UserRepository? userRepository,
+    LoadingManager? loadingManager,
+  })  : auth = auth ?? FirebaseAuth.instance,
+        userRepository = userRepository ?? UserRepository(),
+        _loadingManager = loadingManager ?? serviceLocator<LoadingManager>();
   void _showLoadingDialog() => _loadingManager.showLoading();
   void _hideLoadingDialog() => _loadingManager.hideLoading();
   void showLoadingDialog() => _loadingManager.showLoading();
@@ -29,6 +37,34 @@ class AccountViewmodel extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       Toast().showToast(context, e.toString());
+    } finally {
+      _hideLoadingDialog();
+    }
+  }
+
+  Future<bool> updateProfile({
+    required String fullName,
+    required String username,
+    required String bio,
+  }) async {
+    final user = userModel;
+    if (user == null || fullName.trim().isEmpty || username.trim().isEmpty) {
+      return false;
+    }
+
+    _showLoadingDialog();
+    try {
+      await userRepository.updateUser(
+        uid: user.uid,
+        fullName: fullName.trim(),
+        username: username.trim().toLowerCase(),
+        bio: bio.trim(),
+      );
+      userModel = await userRepository.getCurrentUser();
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
     } finally {
       _hideLoadingDialog();
     }

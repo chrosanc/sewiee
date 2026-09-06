@@ -1,0 +1,96 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam activityFontSize 14
+skinparam activityBorderColor #333333
+skinparam activityBackgroundColor #FFFFFF
+skinparam ArrowColor #333333
+skinparam defaultTextAlignment center
+skinparam nodesep 30
+skinparam ranksep 35
+
+title Activity Diagram Kelola Alamat (CRUD & Pilih)
+
+|Penyewa|
+start
+:Membuka halaman Daftar Alamat;
+
+|Sistem Sewiee|
+:Menampilkan daftar alamat;
+
+|Penyewa|
+if (Pilih Aksi Alamat?) then (Tambah Alamat)
+  :Pilih Tambah Alamat;
+  |Sistem Sewiee|
+  :Reset data alamat sementara
+(clearAddress);
+  :Menampilkan peta pilih lokasi;
+  |Penyewa|
+  :Menggeser peta / Gunakan lokasi saat ini;
+  |Sistem Sewiee|
+  :Cek izin lokasi dan geolocator;
+  if (Lokasi didapatkan?) then (Ya)
+    :Reverse geocoding (koordinat ke teks);
+    :Membentuk model alamat;
+    |Penyewa|
+    :Mengisi form (nama, HP, label, detail);
+    :Menekan Simpan;
+    |Sistem Sewiee|
+    if (Form valid?) then (Ya)
+      :Membuat ID alamat (UUID);
+      :Simpan alamat ke Firestore;
+      :Tampilkan toast sukses;
+    else (Tidak)
+      :Tampilkan toast gagal;
+    endif
+  else (Tidak)
+    :Tampilkan toast aktifkan lokasi;
+  endif
+
+elseif (Aksi Alamat?) then (Ubah Alamat)
+  :Pilih Ubah Alamat;
+  |Sistem Sewiee|
+  :Muat data alamat ke form;
+  |Penyewa|
+  :Mengubah data / lokasi alamat;
+  :Menekan Simpan;
+  |Sistem Sewiee|
+  if (Form valid?) then (Ya)
+    :Simpan perubahan ke Firestore;
+    :Tampilkan toast sukses;
+  else (Tidak)
+    :Tampilkan toast gagal;
+  endif
+
+elseif (Aksi Alamat?) then (Hapus Alamat)
+  :Pilih Hapus Alamat;
+  |Sistem Sewiee|
+  :Menampilkan dialog konfirmasi;
+  |Penyewa|
+  if (Hapus?) then (Ya)
+    |Sistem Sewiee|
+    :Hapus alamat dari Firestore;
+    :Tutup dialog & toast sukses;
+  else (Batal)
+    |Sistem Sewiee|
+    :Tutup dialog;
+  endif
+
+else (Pilih Alamat)
+  :Memilih alamat dari daftar;
+  |Sistem Sewiee|
+  :Set indeks terpilih;
+  |Penyewa|
+  :Menekan tombol Pilih Alamat;
+  |Sistem Sewiee|
+  :Kembalikan data alamat
+ke halaman sebelumnya (pop);
+endif
+
+|Sistem Sewiee|
+:Memuat ulang data alamat (getUserAddresses);
+:Menampilkan halaman terbaru;
+stop
+@enduml

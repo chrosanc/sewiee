@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sewiee/presentation/account/account_viewmodel.dart';
+import 'package:sewiee/presentation/account/address/address_screen.dart';
+import 'package:sewiee/presentation/account/edit_profile_screen.dart';
 import 'package:sewiee/presentation/merchant/manage/manage_merchant_screen.dart';
 import 'package:sewiee/presentation/merchant/manage/manage_merchant_viewmodel.dart';
 import 'package:sewiee/presentation/widget/merchant_status/merchant_verified_widget.dart';
@@ -110,15 +112,25 @@ class _AccountScreenState extends State<AccountScreen> {
                   items: [
                     _MenuItem(
                       title: 'Ubah Profil',
-                      description: 'Atur identitas dan foto profil kamu',
+                      description: 'Atur nama, username, dan bio kamu',
                       icon: Icons.person_rounded,
-                      onTap: () {},
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                        );
+                      },
                     ),
                     _MenuItem(
                       title: 'Daftar Alamat',
                       description: 'Atur alamat pengiriman',
                       icon: Icons.pin_drop_rounded,
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AddressScreen()),
+                        );
+                      },
                     ),
                     _MenuItem(
                       title: 'Notifikasi',

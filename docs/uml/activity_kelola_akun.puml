@@ -1,0 +1,50 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 14
+skinparam activityFontSize 14
+skinparam activityBorderColor #333333
+skinparam activityBackgroundColor #FFFFFF
+skinparam ArrowColor #333333
+skinparam defaultTextAlignment center
+skinparam nodesep 30
+skinparam ranksep 35
+
+title Activity Diagram Mengelola Akun (Profil & Alamat)
+
+|Penyewa|
+start
+:Memilih menu Akun;
+
+|Sistem Sewiee|
+:Memuat data pengguna
+getCurrentUser();
+
+if (Data pengguna berhasil dimuat?) then (Ya)
+  :Menampilkan profil;
+else (Tidak)
+  :Menampilkan toast kesalahan;
+  stop
+endif
+
+|Penyewa|
+if (Pilih aksi?) then (Ubah Profil)
+  |Sistem Sewiee|
+  :Menampilkan menu Ubah Profil;
+  note right
+    Implementasi masih
+    berupa stub (onTap kosong).
+  end note
+  stop
+else (Daftar Alamat)
+  |Sistem Sewiee|
+  :Memuat data pengguna dan
+koleksi alamat Firestore;
+  :Menampilkan daftar alamat;
+endif
+|Penyewa|
+:Lanjut ke proses
+Kelola Alamat;
+stop
+@enduml

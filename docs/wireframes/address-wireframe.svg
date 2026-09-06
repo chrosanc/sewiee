@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" role="img" aria-labelledby="title desc">
+  <title id="title">Sewiee Address Flow Wireframe</title>
+  <desc id="desc">Low-fidelity mobile wireframes for address list, map location picker, address search, and address form.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f4f4f2}.phone{fill:#fff;stroke:#242424;stroke-width:2}.bar{fill:#fff;stroke:#d1d1d1}.card{fill:#fff;stroke:#aaa;stroke-width:1.5}.selected{fill:#f1f1f1;stroke:#333;stroke-width:2}.field{fill:#fff;stroke:#aaa}.map{fill:#e4e4e0;stroke:#999}.button{fill:#333}.buttonText{fill:#fff;font:600 13px Arial}.label{fill:#222;font:600 14px Arial}.body{fill:#555;font:12px Arial}.small{fill:#777;font:11px Arial}.title{fill:#111;font:700 20px Arial}.screenTitle{fill:#111;font:600 13px Arial}.note{fill:#555;font:12px Arial}.line{stroke:#888;stroke-width:1.5;fill:none}.pin{fill:#333}.ghost{fill:#fafafa;stroke:#bbb;stroke-dasharray:5 4}.flow{stroke:#777;stroke-width:2;fill:none;marker-end:url(#arrow)}
+    </style>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#777"/></marker>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#ccc" stroke-width="1"/></pattern>
+  </defs>
+
+  <rect class="bg" width="1600" height="1120"/>
+  <text x="60" y="55" class="title">SEWIEE · ADDRESS FLOW</text>
+  <text x="60" y="80" class="note">Low-fidelity wireframe · source: existing Flutter presentation layer</text>
+
+  <!-- 1. Address list -->
+  <g transform="translate(60 120)">
+    <text x="0" y="-18" class="label">01 · PILIH ALAMAT</text>
+    <rect class="phone" rx="28" width="340" height="860"/>
+    <rect class="bar" x="1" y="30" width="338" height="58"/>
+    <text x="20" y="65" class="screenTitle">‹   Pilih Alamat</text>
+    <text x="240" y="65" class="small">Tambah Alamat</text>
+
+    <g transform="translate(18 110)">
+      <rect class="selected" rx="12" width="304" height="205"/>
+      <circle cx="282" cy="22" r="9" fill="#333"/><circle cx="282" cy="22" r="4" fill="#fff"/>
+      <text x="16" y="28" class="small">RUMAH</text>
+      <text x="16" y="57" class="label">Nama penerima</text>
+      <text x="16" y="79" class="body">08xxxxxxxxxx</text>
+      <text x="16" y="103" class="body">Jl. Contoh No. 10, Kecamatan, Kota</text>
+      <rect class="field" x="16" y="142" rx="9" width="272" height="42"/>
+      <text x="114" y="168" class="body">Ubah Alamat</text>
+      <text x="274" y="57" class="small">⌫</text>
+    </g>
+
+    <g transform="translate(18 330)">
+      <rect class="card" rx="12" width="304" height="205"/>
+      <circle cx="282" cy="22" r="9" fill="#fff" stroke="#777"/>
+      <text x="16" y="28" class="small">KANTOR</text>
+      <text x="16" y="57" class="label">Nama penerima</text>
+      <text x="16" y="79" class="body">08xxxxxxxxxx</text>
+      <text x="16" y="103" class="body">Gedung Contoh, Kecamatan, Kota</text>
+      <rect class="field" x="16" y="142" rx="9" width="272" height="42"/>
+      <text x="114" y="168" class="body">Ubah Alamat</text>
+      <text x="274" y="57" class="small">⌫</text>
+    </g>
+
+    <rect class="bar" x="1" y="774" width="338" height="85"/>
+    <rect class="button" x="18" y="793" rx="10" width="304" height="46"/>
+    <text x="130" y="822" class="buttonText">Pilih Alamat</text>
+  </g>
+
+  <!-- 2. Map picker -->
+  <g transform="translate(440 120)">
+    <text x="0" y="-18" class="label">02 · PILIH LOKASI</text>
+    <rect class="phone" rx="28" width="340" height="860"/>
+    <rect class="bar" x="1" y="30" width="338" height="58"/>
+    <text x="20" y="65" class="screenTitle">‹   Pilih Lokasi Alamat</text>
+    <rect class="map" x="1" y="88" width="338" height="487"/>
+    <rect x="1" y="88" width="338" height="487" fill="url(#grid)" opacity=".7"/>
+    <path class="line" d="M20 180C90 130 130 260 220 205S300 145 335 175M5 390C95 330 170 470 335 350"/>
+    <circle class="pin" cx="170" cy="305" r="12"/><path class="pin" d="M158 307L170 330L182 307Z"/>
+    <rect class="button" x="135" y="520" rx="10" width="187" height="38"/>
+    <text x="153" y="544" class="buttonText">◎  Lokasi saat ini</text>
+
+    <rect class="bar" x="1" y="575" width="338" height="284"/>
+    <rect class="field" x="18" y="595" rx="10" width="304" height="46"/>
+    <text x="34" y="624" class="body">⌕   Cari Lokasi</text>
+    <circle class="pin" cx="30" cy="673" r="7"/><path class="pin" d="M23 674L30 688L37 674Z"/>
+    <text x="50" y="671" class="label">Nama jalan / lokasi</text>
+    <text x="50" y="692" class="small">Kelurahan, Kecamatan, Kabupaten</text>
+    <rect class="button" x="18" y="786" rx="10" width="304" height="46"/>
+    <text x="130" y="815" class="buttonText">Pilih Lokasi</text>
+  </g>
+
+  <!-- 3. Search -->
+  <g transform="translate(820 120)">
+    <text x="0" y="-18" class="label">03 · CARI ALAMAT</text>
+    <rect class="phone" rx="28" width="340" height="860"/>
+    <rect class="bar" x="1" y="30" width="338" height="58"/>
+    <text x="20" y="65" class="screenTitle">‹   Cari Alamat</text>
+    <rect class="field" x="18" y="110" rx="10" width="304" height="48"/>
+    <text x="35" y="140" class="body">⌕   Cari alamat kamu</text>
+
+    <g transform="translate(18 180)">
+      <rect class="ghost" rx="10" width="304" height="64"/>
+      <circle cx="22" cy="26" r="6" class="pin"/>
+      <text x="42" y="25" class="body">Hasil lokasi utama</text>
+      <text x="42" y="44" class="small">Detail alamat hasil Google Places</text>
+      <rect class="ghost" y="76" rx="10" width="304" height="64"/>
+      <circle cx="22" cy="102" r="6" class="pin"/>
+      <text x="42" y="101" class="body">Hasil lokasi berikutnya</text>
+      <text x="42" y="120" class="small">Detail alamat hasil Google Places</text>
+      <rect class="ghost" y="152" rx="10" width="304" height="64"/>
+      <circle cx="22" cy="178" r="6" class="pin"/>
+      <text x="42" y="177" class="body">Hasil lokasi berikutnya</text>
+      <text x="42" y="196" class="small">Detail alamat hasil Google Places</text>
+    </g>
+    <text x="40" y="750" class="small">Pilih hasil → kembali ke peta</text>
+  </g>
+
+  <!-- 4. Edit/create form -->
+  <g transform="translate(1200 120)">
+    <text x="0" y="-18" class="label">04 · DETAIL ALAMAT</text>
+    <rect class="phone" rx="28" width="340" height="860"/>
+    <rect class="bar" x="1" y="30" width="338" height="58"/>
+    <text x="20" y="65" class="screenTitle">‹   Ubah Alamat</text>
+
+    <rect class="card" x="12" y="100" rx="10" width="316" height="174"/>
+    <circle class="pin" cx="30" cy="126" r="7"/><path class="pin" d="M23 127L30 141L37 127Z"/>
+    <text x="48" y="126" class="body">Nama jalan / lokasi</text>
+    <text x="48" y="145" class="small">Kelurahan, Kecamatan, Kabupaten</text>
+    <text x="280" y="126" class="small">Ubah ›</text>
+    <rect class="map" x="24" y="160" rx="8" width="292" height="96"/>
+    <rect x="24" y="160" width="292" height="96" fill="url(#grid)" opacity=".6"/>
+    <circle class="pin" cx="170" cy="202" r="8"/><path class="pin" d="M162 203L170 219L178 203Z"/>
+
+    <rect class="card" x="12" y="286" rx="10" width="316" height="142"/>
+    <text x="26" y="310" class="small">Nama</text><rect class="field" x="24" y="318" rx="8" width="292" height="39"/>
+    <text x="26" y="378" class="small">Nomor Handphone</text><rect class="field" x="24" y="386" rx="8" width="292" height="30"/>
+
+    <rect class="card" x="12" y="440" rx="10" width="316" height="320"/>
+    <text x="26" y="463" class="small">Label</text><rect class="field" x="24" y="470" rx="8" width="292" height="38"/>
+    <text x="26" y="527" class="small">Kabupaten / Kota</text><rect class="field" x="24" y="534" rx="8" width="292" height="38"/>
+    <text x="26" y="591" class="small">Kecamatan</text><rect class="field" x="24" y="598" rx="8" width="292" height="38"/>
+    <text x="26" y="655" class="small">Alamat Lengkap</text><rect class="field" x="24" y="662" rx="8" width="292" height="52"/>
+    <text x="26" y="735" class="small">Pesan untuk Kurir (opsional)</text>
+
+    <rect class="bar" x="1" y="774" width="338" height="85"/>
+    <rect class="button" x="18" y="793" rx="10" width="304" height="46"/>
+    <text x="146" y="822" class="buttonText">Simpan</text>
+  </g>
+
+  <!-- flow labels -->
+  <path class="flow" d="M400 530H430"/><path class="flow" d="M780 530H810"/><path class="flow" d="M780 900C950 1050 1150 1050 1200 900"/>
+  <text x="410" y="515" class="small">+</text><text x="790" y="515" class="small">⌕</text>
+  <text x="650" y="1060" class="note">Tambah alamat → pilih titik → cari bila perlu → lengkapi detail → simpan</text>
+</svg>
