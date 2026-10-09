@@ -63,7 +63,7 @@ lib/
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/username/sewiee.git
+git clone https://github.com/chrosanc/sewiee.git
 cd sewiee
 ```
 
@@ -121,4 +121,4 @@ flutter test integration_test/login_test.dart
 
 ## 📝 Lisensi
 
-Project ini dibuat untuk kebutuhan internal / privat (`publish_to: 'none'`).
+Project portofolio. Kode boleh dilihat sebagai referensi; seluruh hak cipta milik pemilik repository.
