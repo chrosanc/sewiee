@@ -17,8 +17,22 @@ migrate_working_dir/
 .env.*
 !.env.example
 google-services.json
+GoogleService-Info.plist
 firebase_options.dart
 android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# Archives & editor/agent scratch
+*.zip
+*.7z
+.agentbridge/
+.ai/
+.ideabak/
+litellm_config.yaml
+android/.kotlin/
+android/build/
 
 # IntelliJ related
 *.iml
