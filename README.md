@@ -1,25 +1,25 @@
 # Sewiee 🛒
 
-**Sewiee** adalah aplikasi *mobile* berbasis Flutter untuk penyewaan barang secara *online*. Aplikasi ini menghubungkan penyewa (*renter*) dengan pemilik barang (*merchant/store*) untuk kemudahan transaksi sewa produk, sistem pembayaran terintegrasi, kalkulasi ongkir, hingga manajemen pesanan.
+**Sewiee** is a Flutter mobile app for online item rental. It connects renters with item owners (merchants/stores) and covers rental transactions, integrated payments, shipping cost calculation, and order management.
 
 ---
 
-## 🚀 Fitur Utama
+## 🚀 Features
 
-- **Otentikasi & Profil User**: Registrasi, Login, Verifikasi OTP, Pengaturan Alamat.
-- **Katalog & Jelajah Produk**: Pencarian barang, filter kategori, detail barang sewa.
-- **Manajemen Merchant**: Registrasi toko, kelola produk sewa, manajemen merchant.
-- **Transaksi & Pembayaran**: Integrasi Midtrans Payment Gateway (Snap Token).
-- **Pengiriman**: Kalkulasi tarif ekpedisi/ongkir.
-- **Peta & Lokasi**: Integrasi Google Maps API & Places Autocomplete.
-- **Notifikasi**: Push notification via Firebase Cloud Messaging (FCM).
+- **Authentication & Profile**: Registration, login, OTP verification, address management.
+- **Catalog & Discovery**: Item search, category filters, rental item details.
+- **Merchant Management**: Store registration, rental product management.
+- **Transactions & Payments**: Midtrans Payment Gateway integration (Snap Token).
+- **Shipping**: Courier shipping rate calculation.
+- **Maps & Location**: Google Maps API and Places Autocomplete.
+- **Notifications**: Push notifications via Firebase Cloud Messaging (FCM).
 
 ---
 
 ## 🛠 Tech Stack & Dependencies
 
 - **Framework**: Flutter (Dart SDK `>=3.9.2`)
-- **State Management**: `provider` + `get_it` (Service Locator)
+- **State Management**: `provider` + `get_it` (service locator)
 - **Backend / BaaS**: Firebase (Auth, Firestore, Cloud Storage, Messaging, Cloud Functions)
 - **Payment Gateway**: Midtrans SDK / API
 - **Location & Maps**: `google_maps_flutter`, `geolocator`, `geocoding`, `google_places_sdk_flutter`
@@ -27,40 +27,40 @@
 
 ---
 
-## 📂 Struktur Proyek (Clean Architecture / MVVM)
+## 📂 Project Structure (Clean Architecture / MVVM)
 
 ```text
 lib/
-├── app/                  # Theme & konfigurasi global
-├── data/                 # Data Layer
-│   ├── model/            # Data models (User, Product, Order, Payment, dll)
-│   └── services/         # Services (Firebase, Payment, Address, dll)
-├── domain/               # Domain Layer
+├── app/                  # Theme & global configuration
+├── data/                 # Data layer
+│   ├── model/            # Data models (User, Product, Order, Payment, etc.)
+│   └── services/         # Services (Firebase, Payment, Address, etc.)
+├── domain/               # Domain layer
 │   ├── enum/             # Enums
 │   └── repositories/     # Repository interfaces & implementations
-└── presentation/         # UI Layer (MVVM)
-    ├── account/          # Skrin & ViewModel Akun & Alamat
-    ├── add/              # Tambah produk sewa
-    ├── explore/          # Pencarian & Katalog
-    ├── home/             # Beranda
-    ├── login/ & register/# Otentikasi
-    ├── merchant/         # Kelola toko & merchant
-    ├── order/            # Checkout & Riwayat Pesanan
-    ├── products/         # Detail produk
+└── presentation/         # UI layer (MVVM)
+    ├── account/          # Account & address screens and view models
+    ├── add/              # Add rental product
+    ├── explore/          # Search & catalog
+    ├── home/             # Home
+    ├── login/ & register/# Authentication
+    ├── merchant/         # Store & merchant management
+    ├── order/            # Checkout & order history
+    ├── products/         # Product detail
     └── widget/           # Reusable widgets
 ```
 
 ---
 
-## ⚙️ Cara Memulai (Getting Started)
+## ⚙️ Getting Started
 
 ### Prerequisites
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (versi 3.29+ / SDK ^3.9.2)
-- Android Studio / VS Code + Flutter Extension
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (3.29+ / Dart SDK ^3.9.2)
+- Android Studio or VS Code with the Flutter extension
 - Java Development Kit (JDK) 17+
 
-### 1. Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/chrosanc/sewiee.git
@@ -73,15 +73,15 @@ cd sewiee
 flutter pub get
 ```
 
-### 3. Konfigurasi Environment (`.env`)
+### 3. Configure Environment (`.env`)
 
-Salin file `.env.example` menjadi `.env` di root folder:
+Copy `.env.example` to `.env` in the project root:
 
 ```bash
 cp .env.example .env
 ```
 
-Isi variabel lingkungan sesuai API Key milik Anda:
+Fill in the variables with your own API keys:
 
 ```env
 SEND_OTP_API=https://your-send-otp-api-url.com
@@ -92,12 +92,14 @@ MIDTRANS_CLIENT_API_KEY=your_midtrans_client_key
 MIDTRANS_SERVER_API_KEY=your_midtrans_server_key
 ```
 
-### 4. Konfigurasi Firebase
+`.env` is gitignored. On Android, the Gradle build reads `GOOGLE_MAPS_API_KEY` from it and injects it into the manifest.
 
-- Tambahkan `google-services.json` ke folder `android/app/`.
-- Jalankan `flutterfire configure` untuk men-generate `lib/firebase_options.dart`.
+### 4. Configure Firebase
 
-### 5. Jalankan Aplikasi
+- Add `google-services.json` to `android/app/`.
+- Run `flutterfire configure` to generate `lib/firebase_options.dart`.
+
+### 5. Run the App
 
 ```bash
 flutter run
@@ -107,10 +109,10 @@ flutter run
 
 ## 🧪 Testing
 
-Jalankan unit test & integration test:
+Run unit and integration tests:
 
 ```bash
-# Unit test
+# Unit tests
 flutter test
 
 # Integration test
@@ -119,6 +121,6 @@ flutter test integration_test/login_test.dart
 
 ---
 
-## 📝 Lisensi
+## 📝 License
 
-Project portofolio. Kode boleh dilihat sebagai referensi; seluruh hak cipta milik pemilik repository.
+Portfolio project. The code is public for reference only; all rights reserved by the repository owner.
