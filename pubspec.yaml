@@ -76,6 +76,13 @@ dev_dependencies:
   firebase_auth_mocks: ^0.15.1
   integration_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/icon.png
+  remove_alpha_ios: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
