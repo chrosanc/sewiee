@@ -32,7 +32,6 @@ class HomeViewModel extends ChangeNotifier {
   final CategoryService categoryService = CategoryService();
   List<CategoryModel> categories = [];
 
-
   Future<void> getCategory() async {
     _showLoadingDialog();
 
@@ -46,14 +45,14 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-
-  Future<void> getAllProducts(context) async{
+  Future<void> getAllProducts(context) async {
     _showLoadingDialog();
     try {
       products = await productService.getProducts();
-      activeProducts = products.where((product) => product.active && product.stock > 0).toList();
+      activeProducts = products
+          .where((product) => product.active && product.stock > 0)
+          .toList();
       notifyListeners();
-
     } catch (e) {
       Toast().showToast(context, e.toString());
     } finally {
@@ -61,15 +60,18 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-
   Future<void> getUser(BuildContext context) async {
+    final String? user = _auth.currentUser?.uid;
+    if (user == null) {
+      userProfile = null;
+      notifyListeners();
+      return;
+    }
     _showLoadingDialog();
-
-    final String user = _auth.currentUser!.uid;
 
     try {
       final doc = await _firestore.collection('users').doc(user).get();
-      if(doc.exists) {
+      if (doc.exists) {
         userProfile = UserModel.fromJson(doc.data()!);
         notifyListeners();
       }
@@ -79,5 +81,4 @@ class HomeViewModel extends ChangeNotifier {
       _hideLoadingDialog();
     }
   }
-
 }

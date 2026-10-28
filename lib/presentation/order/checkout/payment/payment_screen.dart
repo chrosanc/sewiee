@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
 import 'package:sewiee/app/theme.dart';
 import 'package:sewiee/app/utils/countdown_util.dart';
 import 'package:sewiee/app/utils/currency_utils.dart';
@@ -9,16 +8,18 @@ import 'package:sewiee/app/utils/date_format.dart';
 import 'package:sewiee/app/utils/toast.dart';
 import 'package:sewiee/data/model/order_model.dart';
 import 'package:sewiee/data/model/payment_model.dart';
-import 'package:sewiee/presentation/order/checkout/checkout_viewmodel.dart';
+import 'package:sewiee/domain/repositories/order_repository.dart';
 import 'package:sewiee/presentation/order/payment_success/payment_success_screen.dart';
 import 'package:sewiee/presentation/widget/button_widget.dart';
 
 class PaymentScreen extends StatefulWidget {
   final MidtransTransactionResponseModel paymentData;
+  final String orderId;
 
   const PaymentScreen({
     super.key,
     required this.paymentData,
+    required this.orderId,
   });
 
   @override
@@ -27,23 +28,23 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   bool _isNavigating = false;
+  late final Stream<OrderModel> _orderStream = OrderRepository().streamOrder(
+    widget.orderId,
+  );
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<CheckoutViewmodel>(context);
-    final paymentType = widget.paymentData.data!.paymentType;
+    final data = widget.paymentData.data;
+    final paymentType = data?.paymentType;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Pembayaran',
-          style: TextStyle(fontSize: 12),
-        ),
+        title: const Text('Pembayaran', style: TextStyle(fontSize: 12)),
       ),
       body: SafeArea(
         child: Center(
           child: StreamBuilder<OrderModel?>(
-            stream: vm.streamOrder(),
+            stream: _orderStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
@@ -67,7 +68,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               // =========================
               final isPaymentSuccess =
                   orderModel.payment.paymentStatus == 'paid' ||
-                      orderModel.payment.paymentStatus == 'settlement';
+                  orderModel.payment.paymentStatus == 'settlement';
 
               // =========================
               // AUTO NAVIGATE
@@ -80,9 +81,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => PaymentSuccessScreen(
-                        orderModel: orderModel,
-                      ),
+                      builder: (_) =>
+                          PaymentSuccessScreen(orderModel: orderModel),
                     ),
                   );
                 });
@@ -112,8 +112,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               vertical: 10,
                             ),
                             child: Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Row(
                                   children: [
@@ -124,7 +123,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                     const Gap(10),
                                     Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           'Bayar Sebelum',
@@ -174,15 +173,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           // =========================
                           if (paymentType == 'bank_transfer') ...[
                             Padding(
-                              padding:
-                              const EdgeInsets.symmetric(horizontal: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
                               child: Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Nomor Virtual Account',
@@ -195,12 +195,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                       Row(
                                         children: [
                                           Text(
-                                            vm
-                                                .midtransTransactionResponseModel
-                                                ?.data
-                                                ?.vaNumbers
-                                                ?.firstOrNull
-                                                ?.vaNumber ??
+                                            data
+                                                    ?.vaNumbers
+                                                    .firstOrNull
+                                                    ?.vaNumber ??
                                                 '0000000000',
                                             style: const TextStyle(
                                               fontSize: 14,
@@ -212,12 +210,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                                           GestureDetector(
                                             onTap: () {
-                                              final text = vm
-                                                  .midtransTransactionResponseModel
-                                                  ?.data
-                                                  ?.vaNumbers
-                                                  ?.firstOrNull
-                                                  ?.vaNumber ??
+                                              final text =
+                                                  data
+                                                      ?.vaNumbers
+                                                      .firstOrNull
+                                                      ?.vaNumber ??
                                                   '';
 
                                               Clipboard.setData(
@@ -240,23 +237,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                     ],
                                   ),
 
-                                  if (vm.selectedPaymentMethod?.image != null)
+                                  if (orderModel
+                                      .payment
+                                      .paymentMethod
+                                      .image
+                                      .isNotEmpty)
                                     Image.network(
-                                      vm.selectedPaymentMethod!.image,
+                                      orderModel.payment.paymentMethod.image,
                                       width: 50,
                                     ),
                                 ],
                               ),
                             ),
                           ]
-
                           // =========================
                           // QRIS
                           // =========================
                           else if (paymentType == 'qris') ...[
                             Padding(
-                              padding:
-                              const EdgeInsets.symmetric(horizontal: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
                               child: Column(
                                 children: [
                                   Row(
@@ -266,11 +267,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                       const Gap(10),
                                       GestureDetector(
                                         onTap: () {
-                                          final qrString = vm
-                                              .midtransTransactionResponseModel
-                                              ?.data
-                                              ?.qrString ??
-                                              '';
+                                          final qrString = data?.qrString ?? '';
 
                                           Clipboard.setData(
                                             ClipboardData(text: qrString),
@@ -294,21 +291,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                                   Center(
                                     child: Image.network(
-                                      vm
-                                          .midtransTransactionResponseModel
-                                          ?.data
-                                          ?.qrString ??
-                                          '',
+                                      data?.qrString ?? '',
                                       width: 200,
                                       height: 200,
                                       errorBuilder:
                                           (context, error, stackTrace) {
-                                        return const Text(
-                                          'Gagal memuat QRIS',
-                                          style:
-                                          TextStyle(color: Colors.red),
-                                        );
-                                      },
+                                            return const Text(
+                                              'Gagal memuat QRIS',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            );
+                                          },
                                     ),
                                   ),
                                 ],
@@ -325,13 +319,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               vertical: 10,
                             ),
                             child: Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Text(
                                       'Total Bayar',
@@ -342,7 +334,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                     ),
                                     Text(
                                       CurrencyUtils().toRupiah(
-                                        vm.transactionModel?.grossAmount ?? 0,
+                                        orderModel.payment.amount.totalPayment,
                                       ),
                                       style: TextStyle(
                                         fontSize: 14,
@@ -396,9 +388,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   void _checkPaymentStatus() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Mengecek status pembayaran...'),
-      ),
+      const SnackBar(content: Text('Mengecek status pembayaran...')),
     );
   }
 }

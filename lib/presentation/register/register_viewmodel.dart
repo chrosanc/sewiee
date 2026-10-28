@@ -14,6 +14,9 @@ class RegisterViewModel extends ChangeNotifier {
   // OTP
   // =========================
 
+  // OTP dimatikan sementara; set true untuk aktifkan lagi.
+  static const bool otpEnabled = false;
+
   final OtpRepository otpRepository = OtpRepository();
 
   int? _resendToken;
@@ -180,6 +183,11 @@ class RegisterViewModel extends ChangeNotifier {
   // =========================
 
   Future<void> registerPhoneNumber(BuildContext context) async {
+    if (!otpEnabled) {
+      await _createAccount(context);
+      return;
+    }
+
     _isLoading = true;
     notifyListeners();
 
@@ -240,11 +248,34 @@ class RegisterViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await otpRepository.verifyOtp('+62${_userPhoneNumber!.trim()}', otpCode.trim(),);
+      final result = await otpRepository.verifyOtp(
+        '+62${_userPhoneNumber!.trim()}',
+        otpCode.trim(),
+      );
       if (!result['success']) {
         Toast().showToast(context, result['message']);
         return false;
       }
+    } catch (e) {
+      debugPrint("OTP Verification Error: $e");
+      Toast().showToast(context, "OTP Verification Failed");
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+    return _createAccount(context);
+  }
+
+  // =========================
+  // CREATE ACCOUNT
+  // =========================
+
+  Future<bool> _createAccount(BuildContext context) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: _userEmail!,
         password: _password!,
@@ -277,8 +308,8 @@ class RegisterViewModel extends ChangeNotifier {
 
       return true;
     } catch (e) {
-      debugPrint("OTP Verification Error: $e");
-      Toast().showToast(context, "OTP Verification Failed");
+      debugPrint("Register Error: $e");
+      Toast().showToast(context, "Registrasi gagal: $e");
 
       return false;
     } finally {
@@ -294,12 +325,9 @@ class RegisterViewModel extends ChangeNotifier {
   Future<void> resendOtp(BuildContext context) async {
     try {
       final result = await otpRepository.sendOtp('+62$_userPhoneNumber');
-      if(result['success']) {
+      if (result['success']) {
         startResendCooldown();
-        Toast().showToast(
-          context,
-          "OTP sudah dikirim kembali",
-        );
+        Toast().showToast(context, "OTP sudah dikirim kembali");
       } else {
         Toast().showToast(context, result['message']);
       }

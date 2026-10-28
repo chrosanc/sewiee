@@ -632,27 +632,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               final result = await vm.createOrder();
               if (result != null) {
                 final transaction = await vm.createMidtransTransaction();
-                if (transaction != null && context.mounted) {
-                  if (transaction.data!.paymentType == 'gopay') {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PaymentWebviewScreen(
-                          url: transaction.data!.qrString!,
-                        ),
-                      ),
-                    );
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PaymentScreen(
-                          paymentData: vm.midtransTransactionResponseModel!,
-                        ),
-                      ),
-                    );
-                  }
+                if (!context.mounted) return;
+                final data = transaction?.data;
+                if (transaction == null || data == null) {
+                  Toast().showToast(
+                    context,
+                    transaction?.message ?? 'Gagal membuat transaksi',
+                  );
+                  return;
                 }
+                if (data.paymentType == 'gopay' && data.qrString != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaymentWebviewScreen(url: data.qrString!),
+                    ),
+                  );
+                } else {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaymentScreen(
+                        paymentData: transaction,
+                        orderId: result.id,
+                      ),
+                    ),
+                  );
+                }
+              } else if (context.mounted) {
+                Toast().showToast(context, 'Gagal membuat pesanan');
               }
               // Navigator.push(context, MaterialPageRoute(builder: (_) => PaymentScreen()));
             } else {

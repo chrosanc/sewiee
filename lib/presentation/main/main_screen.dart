@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sewiee/app/utils/auth_guard.dart';
 import 'package:sewiee/presentation/account/account_screen.dart';
 import 'package:sewiee/presentation/add/add_product_screen.dart';
 import 'package:sewiee/presentation/explore/explore_screen.dart';
@@ -16,13 +17,12 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
   final List<Widget> _screens = [
     HomeScreen(),
     ExploreScreen(),
     AddProductScreen(),
     OrderScreen(),
-    AccountScreen()
+    AccountScreen(),
   ];
 
   @override
@@ -32,7 +32,11 @@ class _MainScreenState extends State<MainScreen> {
       body: _screens[viewModel.currentIndex],
       bottomNavigationBar: BottomNavBar(
         currentIndex: viewModel.currentIndex,
-        onTap: (index) => viewModel.navigateToPages(index),
+        onTap: (index) async {
+          // Tambah produk, Pesanan, Akun butuh login.
+          if (index >= 2 && !await requireLogin(context)) return;
+          viewModel.navigateToPages(index);
+        },
       ),
     );
   }

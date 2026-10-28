@@ -273,8 +273,8 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
     final int depositAmount = productModel?.rentalTerms.depositAmount ?? 0;
     final int shippingPrice =
         selectedDeliveryMethod == 'expedition' && selectedCourier != null
-            ? selectedCourier!.price
-            : 0;
+        ? selectedCourier!.price
+        : 0;
 
     totalPrice =
         productPrice +
@@ -685,7 +685,9 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout', style: TextStyle(fontSize: 14))),
+      appBar: AppBar(
+        title: const Text('Checkout', style: TextStyle(fontSize: 14)),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -805,7 +807,8 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      productModel?.productName ?? 'Nama Produk',
+                                      productModel?.productName ??
+                                          'Nama Produk',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(fontSize: 12),
@@ -923,10 +926,13 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
                                           },
                                           child: ListView.builder(
                                             shrinkWrap: true,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            itemCount: availableDeliveryOptions.length,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemCount:
+                                                availableDeliveryOptions.length,
                                             itemBuilder: (context, index) {
-                                              final item = availableDeliveryOptions[index];
+                                              final item =
+                                                  availableDeliveryOptions[index];
 
                                               if (item['enabled'] == false) {
                                                 return const SizedBox.shrink();
@@ -947,23 +953,29 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
                                       ),
                                       selectedDeliveryMethod == 'expedition'
                                           ? Padding(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 20,
-                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 20,
+                                                  ),
                                               child: ListTile(
                                                 title: Text(
-                                                  selectedCourier?.courierName ??
+                                                  selectedCourier
+                                                          ?.courierName ??
                                                       'Pilih Ekspedisi',
                                                   style: const TextStyle(
                                                     fontSize: 12,
                                                   ),
                                                 ),
                                                 trailing: const Icon(
-                                                  Icons.keyboard_arrow_right_rounded,
+                                                  Icons
+                                                      .keyboard_arrow_right_rounded,
                                                 ),
                                                 onTap: () async {
-                                                  debugPrint(selectedDeliveryMethod);
-                                                  if (selectedDeliveryMethod == 'expedition') {
+                                                  debugPrint(
+                                                    selectedDeliveryMethod,
+                                                  );
+                                                  if (selectedDeliveryMethod ==
+                                                      'expedition') {
                                                     await _showExpeditionSheet(
                                                       setModalState,
                                                     );
@@ -1010,10 +1022,13 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
                                           },
                                           child: ListView.builder(
                                             shrinkWrap: true,
-                                            physics: const NeverScrollableScrollPhysics(),
-                                            itemCount: availableReturnOptions.length,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemCount:
+                                                availableReturnOptions.length,
                                             itemBuilder: (context, index) {
-                                              final item = availableReturnOptions[index];
+                                              final item =
+                                                  availableReturnOptions[index];
 
                                               if (item['enabled'] == false) {
                                                 return const SizedBox.shrink();
@@ -1083,7 +1098,10 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
                       children: [
                         Text(
                           'Total Harga ($rentDurationCount Bulan)',
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                         Text(
                           CurrencyUtils().toRupiah(
@@ -1161,7 +1179,10 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total Harga', style: TextStyle(fontSize: 12)),
+                        const Text(
+                          'Total Harga',
+                          style: TextStyle(fontSize: 12),
+                        ),
                         Text(
                           CurrencyUtils().toRupiah(countTotalPrice()),
                           style: const TextStyle(fontSize: 12),
@@ -1187,27 +1208,35 @@ class _CheckoutScreenNonMvvmState extends State<CheckoutScreenNonMvvm> {
               final result = await createOrder();
               if (result != null) {
                 final transaction = await createMidtransTransaction();
-                if (transaction != null && context.mounted) {
-                  if (transaction.data!.paymentType == 'gopay') {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PaymentWebviewScreen(
-                          url: transaction.data!.qrString!,
-                        ),
-                      ),
-                    );
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PaymentScreen(
-                          paymentData: midtransTransactionResponseModel!,
-                        ),
-                      ),
-                    );
-                  }
+                if (!context.mounted) return;
+                final data = transaction?.data;
+                if (transaction == null || data == null) {
+                  Toast().showToast(
+                    context,
+                    transaction?.message ?? 'Gagal membuat transaksi',
+                  );
+                  return;
                 }
+                if (data.paymentType == 'gopay' && data.qrString != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaymentWebviewScreen(url: data.qrString!),
+                    ),
+                  );
+                } else {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PaymentScreen(
+                        paymentData: transaction,
+                        orderId: result.id,
+                      ),
+                    ),
+                  );
+                }
+              } else if (context.mounted) {
+                Toast().showToast(context, 'Gagal membuat pesanan');
               }
             } else {
               Toast().showToast(

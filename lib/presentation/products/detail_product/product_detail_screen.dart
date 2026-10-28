@@ -5,6 +5,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/fa6_regular.dart';
 import 'package:provider/provider.dart';
 import 'package:sewiee/app/theme.dart';
+import 'package:sewiee/app/utils/auth_guard.dart';
 import 'package:sewiee/app/utils/currency_utils.dart';
 import 'package:sewiee/app/utils/toast.dart';
 import 'package:sewiee/presentation/home/home_viewmodel.dart';
@@ -72,7 +73,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             label: 'Checkout',
             isEnabled: true,
             isLoading: false,
-            onPressed: () {
+            onPressed: () async {
+              if (!await requireLogin(context) || !context.mounted) return;
               if (vm.product != null) {
                 Navigator.push(
                   context,
